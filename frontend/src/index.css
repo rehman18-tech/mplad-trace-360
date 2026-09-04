@@ -1,0 +1,164 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-sans antialiased text-slate-800 bg-[#F8FAFC];
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+/* Modern Private-Sector SaaS Styling */
+.tech-grid {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+}
+
+.mesh-glow {
+  background: radial-gradient(circle at 50% -20%, rgba(249, 115, 22, 0.12) 0%, rgba(99, 102, 241, 0.08) 35%, transparent 70%);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.glass-card-hover {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glass-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -6px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.04);
+  border-color: rgba(203, 213, 225, 1);
+}
+
+.glass-header {
+  background: rgba(11, 15, 25, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(30, 41, 59, 0.8);
+}
+
+.badge-glow-emerald {
+  box-shadow: 0 0 12px -1px rgba(16, 185, 129, 0.4);
+}
+
+.badge-glow-saffron {
+  box-shadow: 0 0 12px -1px rgba(249, 115, 22, 0.4);
+}
+
+/* Indian National Tricolor & Animation Utilities */
+@keyframes chakraSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes tirangaShimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes radarSweep {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes flagFloat {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-4px) rotate(1deg); }
+}
+
+@keyframes pulseBorder {
+  0%, 100% { border-color: rgba(234, 88, 12, 0.4); box-shadow: 0 0 15px rgba(234, 88, 12, 0.2); }
+  50% { border-color: rgba(21, 128, 61, 0.4); box-shadow: 0 0 15px rgba(21, 128, 61, 0.2); }
+}
+
+.animate-chakra {
+  animation: chakraSpin 24s linear infinite;
+}
+
+.animate-chakra-fast {
+  animation: chakraSpin 10s linear infinite;
+}
+
+.animate-radar {
+  animation: radarSweep 4s linear infinite;
+}
+
+.animate-flag-float {
+  animation: flagFloat 4s ease-in-out infinite;
+}
+
+.animate-tiranga-shimmer {
+  background: linear-gradient(90deg, #EA580C, #FFFFFF, #15803D, #EA580C);
+  background-size: 300% 100%;
+  animation: tirangaShimmer 6s ease infinite;
+}
+
+.tiranga-border-animated {
+  border-width: 1.5px;
+  border-style: solid;
+  animation: pulseBorder 4s infinite;
+}
+
+.tiranga-text-gradient {
+  background: linear-gradient(135deg, #F97316 10%, #FBBF24 45%, #10B981 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.tiranga-badge {
+  background: linear-gradient(135deg, rgba(234, 88, 12, 0.15) 0%, rgba(255, 255, 255, 0.1) 50%, rgba(21, 128, 61, 0.15) 100%);
+  border: 1px solid rgba(234, 88, 12, 0.3);
+}
+
+.tiranga-glow {
+  box-shadow: 0 0 25px -3px rgba(234, 88, 12, 0.35), 0 0 15px -3px rgba(21, 128, 61, 0.25);
+}
+
+/* Subtle Motifs */
+.chakra-pattern {
+  background-image: radial-gradient(circle at 50% 50%, rgba(11, 37, 69, 0.03) 0%, rgba(11, 37, 69, 0.01) 70%, transparent 100%);
+}
+
+.indian-border-subtle {
+  border-image: linear-gradient(to right, #EA580C, #0B2545, #15803D) 1;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Print Styles for Official Dossier Reports */
+@media print {
+  aside, header, nav, .no-print {
+    display: none !important;
+  }
+  main, .print-full {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  body {
+    background: white !important;
+    color: black !important;
+  }
+}

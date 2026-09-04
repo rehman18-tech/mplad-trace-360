@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_NAME=MPLAD-TRACE 360
+      - DEMO_MODE=true
+      - DATABASE_URL=sqlite:///./mplad_trace.db
+      - JWT_SECRET=mplad-trace-super-secret-key-2024-gov-in
+    volumes:
+      - ./mplad_trace.db:/app/mplad_trace.db
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
