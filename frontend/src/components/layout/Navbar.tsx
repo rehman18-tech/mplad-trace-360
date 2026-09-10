@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { useLanguage, LANGUAGE_LABELS } from '../../context/LanguageContext';
+import { useLanguage } from '../../context/LanguageContext';
+import { LANGUAGE_LABELS } from '../../constants/languages';
 import { useToast } from '../../context/ToastContext';
 import { UserRole, Language } from '../../types';
 import { 
@@ -22,6 +23,44 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onSearchSelect,
   const [showNotifications, setShowNotifications] = useState(false);
   const [showRoleMenu, setShowRoleMenu] = useState(false);
   const [showLangMenu, setShowLangMenu] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+
+  const langRef = useRef<HTMLDivElement>(null);
+  const roleRef = useRef<HTMLDivElement>(null);
+  const notifRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdowns on outside click or Escape key
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as Node;
+      if (langRef.current && !langRef.current.contains(target)) {
+        setShowLangMenu(false);
+      }
+      if (roleRef.current && !roleRef.current.contains(target)) {
+        setShowRoleMenu(false);
+      }
+      if (notifRef.current && !notifRef.current.contains(target)) {
+        setShowNotifications(false);
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowLangMenu(false);
+        setShowRoleMenu(false);
+        setShowNotifications(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   const notifications = [
     { id: 1, title: "Critical Anomaly Flagged", text: "110-day delay & 36.5% progress gap in MPLAD-UP-2026-00084 (Varanasi)", time: "10m ago", sev: "critical", projId: "MPLAD-UP-2026-00084" },
@@ -104,7 +143,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onSearchSelect,
                 </span>
                 <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-widest bg-orange-100/80 text-orange-800 rounded-full border border-orange-300/80">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
-                  LIVE AUDIT
+                  {t('live_audit', 'LIVE AUDIT')}
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -140,16 +179,16 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onSearchSelect,
             </button>
             <input
               type="text"
-              placeholder={t('search_placeholder')}
+              placeholder={t('nav_search_placeholder', 'Search works, MPs, IDs...')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-[#FAF7F0] border border-amber-200/90 focus:border-amber-500 rounded-xl pl-9 pr-16 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 transition-all shadow-inner"
+              className="w-full bg-[#FAF7F0] border border-amber-200/90 focus:border-amber-500 rounded-xl pl-9 pr-24 py-1.5 text-xs text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 transition-all shadow-inner"
             />
             {searchTerm && (
               <button
                 type="button"
                 onClick={() => setSearchTerm('')}
-                className="absolute right-10 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 text-[11px] font-mono px-1 rounded"
+                className="absolute right-14 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 text-[11px] font-mono px-1 rounded"
                 title="Clear Search"
               >
                 ✕
@@ -166,26 +205,47 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onSearchSelect,
         </div>
 
         {/* Right: Role Switcher, Language & Notifications */}
-        <div className="flex items-center gap-2 sm:gap-2.5">
+        <div className="flex items-center gap-1.5 sm:gap-2.5">
+          {/* Mobile Search Toggle */}
+          <button
+            type="button"
+            onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
+            className="md:hidden p-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-slate-700 border border-amber-300 transition-colors shadow-2xs"
+            title="Search Works"
+            aria-label="Toggle Mobile Search"
+          >
+            <Search className="w-4 h-4 text-orange-600" />
+          </button>
+
           {/* Language Selector */}
-          <div className="relative">
+          <div ref={langRef} className="relative no-translate" data-no-translate="true">
             <button
-              onClick={() => setShowLangMenu(!showLangMenu)}
-              className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-950 border border-amber-300 font-semibold transition-all hover:border-amber-400 shadow-xs"
+              type="button"
+              onClick={() => {
+                setShowLangMenu(!showLangMenu);
+                setShowRoleMenu(false);
+                setShowNotifications(false);
+              }}
+              className="no-translate flex items-center gap-1 sm:gap-1.5 text-xs px-2 sm:px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-950 border border-amber-300 font-semibold transition-all hover:border-amber-400 shadow-xs"
               title="Change Language / भाषा बदलें"
+              data-no-translate="true"
             >
-              <Globe className="w-3.5 h-3.5 text-orange-600" />
-              <span className="font-bold text-[11px]">{LANGUAGE_LABELS[language].native}</span>
-              <span className="uppercase font-mono text-[10px] px-1 py-0.2 rounded bg-amber-200/80 text-amber-900">{language}</span>
+              <Globe className="w-3.5 h-3.5 text-orange-600 shrink-0" />
+              <span className="no-translate font-bold text-[11px] hidden xs:inline">
+                {LANGUAGE_LABELS[language]?.native || 'English'}
+              </span>
+              <span className="no-translate uppercase font-mono text-[10px] px-1 py-0.2 rounded bg-amber-200/80 text-amber-900 font-bold">
+                {LANGUAGE_LABELS[language]?.code || 'EN'}
+              </span>
               <ChevronDown className="w-3 h-3 text-slate-500" />
             </button>
 
             {showLangMenu && (
-              <div className="absolute right-0 mt-2 w-52 bg-white text-slate-800 rounded-2xl shadow-xl border border-amber-200/90 py-2 z-50 text-xs divide-y divide-amber-50 animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="absolute right-0 mt-2 w-52 max-w-[calc(100vw-1.5rem)] bg-white text-slate-800 rounded-2xl shadow-xl border border-amber-200/90 py-2 z-50 text-xs divide-y divide-amber-50 animate-in fade-in slide-in-from-top-2 duration-150">
                 <div className="px-3 py-1.5 text-[10px] font-bold text-amber-900 uppercase tracking-wider bg-amber-50/50">
                   Select Language / भाषा चुनें
                 </div>
-                <div className="py-1">
+                <div className="py-1 max-h-72 overflow-y-auto">
                   {(Object.keys(LANGUAGE_LABELS) as Language[]).map((langCode) => {
                     const info = LANGUAGE_LABELS[langCode];
                     const isSelected = language === langCode;
@@ -216,10 +276,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onSearchSelect,
           </div>
 
           {/* Role Switcher Button */}
-          <div className="relative">
+          <div ref={roleRef} className="relative">
             <button
-              onClick={() => setShowRoleMenu(!showRoleMenu)}
-              className="flex items-center gap-2 bg-amber-50 hover:bg-amber-100 border border-amber-300 hover:border-amber-400 px-3 py-1.5 rounded-xl text-xs transition-all shadow-xs text-slate-800"
+              onClick={() => {
+                setShowRoleMenu(!showRoleMenu);
+                setShowLangMenu(false);
+                setShowNotifications(false);
+              }}
+              className="flex items-center gap-1.5 sm:gap-2 bg-amber-50 hover:bg-amber-100 border border-amber-300 hover:border-amber-400 px-2 sm:px-3 py-1.5 rounded-xl text-xs transition-all shadow-xs text-slate-800"
             >
               <div className="w-5 h-5 rounded-lg bg-gradient-to-tr from-orange-600 to-amber-600 text-white flex items-center justify-center text-[10px] font-black shadow-xs">
                 {role[0]}
@@ -232,7 +296,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onSearchSelect,
             </button>
 
             {showRoleMenu && (
-              <div className="absolute right-0 mt-2 w-80 bg-white text-slate-800 rounded-2xl shadow-xl border border-amber-200/90 p-2 z-50 text-xs animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-1.5rem)] bg-white text-slate-800 rounded-2xl shadow-xl border border-amber-200/90 p-2 z-50 text-xs animate-in fade-in slide-in-from-top-2 duration-150">
                 <div className="px-3 py-2 border-b border-amber-100 mb-1 bg-amber-50/60 rounded-xl">
                   <p className="font-bold text-amber-950 flex items-center gap-1.5">
                     <ShieldCheck className="w-4 h-4 text-orange-600" />
@@ -274,18 +338,22 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onSearchSelect,
           </div>
 
           {/* Notifications */}
-          <div className="relative">
+          <div ref={notifRef} className="relative">
             <button
-              onClick={() => setShowNotifications(!showNotifications)}
-              className="relative p-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-slate-700 hover:text-slate-900 border border-amber-300 transition-all shadow-xs"
+              onClick={() => {
+                setShowNotifications(!showNotifications);
+                setShowLangMenu(false);
+                setShowRoleMenu(false);
+              }}
+              className="relative p-1.5 sm:p-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-slate-700 hover:text-slate-900 border border-amber-300 transition-all shadow-xs"
               title="System Alerts & Escalations"
             >
               <Bell className="w-4 h-4 text-amber-900" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white animate-pulse"></span>
+              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white animate-pulse"></span>
             </button>
 
             {showNotifications && (
-              <div className="absolute right-0 mt-2 w-88 bg-white text-slate-800 rounded-2xl shadow-xl border border-amber-200 p-3 z-50 text-xs animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="absolute right-0 mt-2 w-88 max-w-[calc(100vw-1.5rem)] bg-white text-slate-800 rounded-2xl shadow-xl border border-amber-200 p-3 z-50 text-xs animate-in fade-in slide-in-from-top-2 duration-150">
                 <div className="flex items-center justify-between pb-2.5 border-b border-amber-100 mb-2">
                   <div className="flex items-center gap-1.5">
                     <AlertTriangle className="w-4 h-4 text-amber-600" />
@@ -293,7 +361,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onSearchSelect,
                   </div>
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 font-bold uppercase">Live Telemetry</span>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2 max-h-72 overflow-y-auto">
                   {notifications.map((n) => (
                     <div 
                       key={n.id} 
@@ -325,6 +393,29 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onSearchSelect,
           </div>
         </div>
       </div>
+
+      {/* Expandable Mobile Search Row */}
+      {mobileSearchOpen && (
+        <div className="px-4 py-2.5 bg-[#FAF7F0] border-t border-amber-200/80 md:hidden animate-in fade-in slide-in-from-top-1 duration-150">
+          <form onSubmit={handleSearchSubmit} className="relative flex items-center">
+            <Search className="w-4 h-4 absolute left-3 text-slate-400" />
+            <input
+              type="text"
+              placeholder={t('nav_search_placeholder', 'Search works, MPs, IDs...')}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-white border border-amber-300 rounded-xl pl-9 pr-16 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+              autoFocus
+            />
+            <button
+              type="submit"
+              className="absolute right-1.5 px-3 py-1 bg-gradient-to-r from-orange-600 to-amber-600 text-white text-[11px] font-bold rounded-lg shadow-xs"
+            >
+              {t('search_button')}
+            </button>
+          </form>
+        </div>
+      )}
     </header>
   );
 };

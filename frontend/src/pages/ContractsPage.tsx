@@ -22,15 +22,15 @@ export const ContractsPage: React.FC<ContractsPageProps> = ({ onOpenProject, onS
 
   const getContractHealthBadge = (p: Project) => {
     if (p.delay_days > 90 || p.overall_risk_score >= 75) {
-      return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800 border border-red-300">🔴 Critical</span>;
+      return <span className="inline-flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800 border border-red-300 whitespace-nowrap shadow-2xs">🔴 Critical</span>;
     }
     if (p.delay_days > 45 || p.overall_risk_score >= 50) {
-      return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-800 border border-orange-300">🟠 High Risk</span>;
+      return <span className="inline-flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-800 border border-orange-300 whitespace-nowrap shadow-2xs">🟠 High Risk</span>;
     }
     if (p.delay_days > 0 || p.overall_risk_score >= 30) {
-      return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300">🟡 Attention</span>;
+      return <span className="inline-flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300 whitespace-nowrap shadow-2xs">🟡 Attention</span>;
     }
-    return <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">🟢 Normal</span>;
+    return <span className="inline-flex items-center justify-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 whitespace-nowrap shadow-2xs">🟢 Normal</span>;
   };
 
   return (
@@ -89,19 +89,19 @@ export const ContractsPage: React.FC<ContractsPageProps> = ({ onOpenProject, onS
                     <span className="font-semibold text-gov-charcoal block truncate max-w-xs">{p.title}</span>
                     <span className="text-[10px] text-slate-400">{p.id}</span>
                   </td>
-                  <td className="p-3 text-right font-extrabold text-gov-navy">
-                    {formatIndianCurrency(p.contract_amount)}
+                  <td className="p-3 text-right font-extrabold text-gov-navy whitespace-nowrap">
+                    {formatIndianCurrency(p.contract_amount || p.sanctioned_amount)}
                   </td>
-                  <td className="p-3 text-center text-slate-600">
-                    <div className="text-[11px] font-medium">{p.start_date || '2025-06-01'}</div>
-                    <div className="text-[10px] text-slate-400">Due: {p.expected_completion_date}</div>
+                  <td className="p-3 text-center text-slate-600 whitespace-nowrap min-w-[120px]">
+                    <div className="text-[11px] font-bold text-gov-navy">{p.start_date || '2025-06-01'}</div>
+                    <div className="text-[10px] text-slate-500 font-semibold mt-0.5">Due: {p.expected_completion_date || '2026-03-31'}</div>
                   </td>
-                  <td className="p-3 text-center">
-                    <span className="text-[11px] font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
+                  <td className="p-3 text-center whitespace-nowrap">
+                    <span className="text-[11px] font-semibold text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded">
                       36 Months
                     </span>
                   </td>
-                  <td className="p-3 text-center">
+                  <td className="p-3 text-center whitespace-nowrap min-w-[130px]">
                     {getContractHealthBadge(p)}
                   </td>
                   <td className="p-3 text-center">

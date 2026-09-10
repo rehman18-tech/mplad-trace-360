@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0B2545" />
+      <stop offset="100%" stop-color="#134074" />
+    </linearGradient>
+    <linearGradient id="flagGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FF9933" />
+      <stop offset="50%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#138808" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background rounded rect -->
+  <rect width="192" height="192" rx="42" fill="url(#bgGrad)" />
+
+  <!-- Tricolor Accent Ribbon -->
+  <rect x="24" y="22" width="144" height="6" rx="3" fill="url(#flagGrad)" />
+
+  <!-- Outer Ring -->
+  <circle cx="96" cy="100" r="48" stroke="#EE9B00" stroke-width="3" fill="none" opacity="0.3" />
+
+  <!-- Ashoka Chakra -->
+  <circle cx="96" cy="100" r="38" stroke="#00D2D3" stroke-width="2.5" fill="#0B2545" />
+  <circle cx="96" cy="100" r="9" fill="#0B2545" stroke="#00D2D3" stroke-width="2" />
+  <circle cx="96" cy="100" r="3.5" fill="#FF9933" />
+
+  <!-- 24 spokes -->
+  <g stroke="#00D2D3" stroke-width="1.2">
+    <line x1="96" y1="62" x2="96" y2="91" />
+    <line x1="96" y1="109" x2="96" y2="138" />
+    <line x1="58" y1="100" x2="87" y2="100" />
+    <line x1="105" y1="100" x2="134" y2="100" />
+    <line x1="69" y1="73" x2="90" y2="94" />
+    <line x1="102" y1="106" x2="123" y2="127" />
+    <line x1="69" y1="127" x2="90" y2="106" />
+    <line x1="102" y1="94" x2="123" y2="73" />
+    <line x1="78" y1="66" x2="93" y2="92" />
+    <line x1="99" y1="108" x2="114" y2="134" />
+    <line x1="62" y1="84" x2="89" y2="97" />
+    <line x1="103" y1="103" x2="130" y2="116" />
+    <line x1="62" y1="116" x2="89" y2="103" />
+    <line x1="103" y1="97" x2="130" y2="84" />
+    <line x1="78" y1="134" x2="93" y2="108" />
+    <line x1="99" y1="92" x2="114" y2="66" />
+  </g>
+
+  <!-- Mobile Inspection Badge / GPS Dot -->
+  <circle cx="140" cy="144" r="14" fill="#10B981" stroke="#0B2545" stroke-width="3" />
+  <path d="M135 144 L139 148 L146 140" stroke="#FFFFFF" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- Label -->
+  <text x="96" y="172" fill="#E2E8F0" font-family="system-ui, sans-serif" font-weight="bold" font-size="11" text-anchor="middle" letter-spacing="1">MPLAD FIELD</text>
+</svg>

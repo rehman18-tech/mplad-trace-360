@@ -1,0 +1,12 @@
+{
+  "appId": "gov.in.mospi.mpladtrace",
+  "appName": "MPLAD Field",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}

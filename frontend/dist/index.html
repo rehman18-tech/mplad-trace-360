@@ -3,18 +3,37 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%230B2545'/><circle cx='50' cy='50' r='36' fill='none' stroke='%23EA580C' stroke-width='4'/><circle cx='50' cy='50' r='8' fill='%23EA580C'/><circle cx='50' cy='50' r='24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-dasharray='4,4'/></svg>" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
     <title>MPLAD-TRACE 360 | AI-Powered Public Infrastructure Monitoring & Early-Warning</title>
     <!-- Inter & Noto Sans Font System -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- PWA Manifest & Mobile Capability Tags -->
+    <link rel="manifest" href="./manifest.json" />
+    <meta name="theme-color" content="#0B2545" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="MPLAD Field" />
+    <link rel="apple-touch-icon" href="./icons/icon-192.svg" />
+
     <!-- Leaflet CSS for Maps -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-    <script type="module" crossorigin src="/assets/index-C4yieBgo.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-Bagw1Eqd.css">
+    <script type="module" crossorigin src="./assets/index-Dk0gIUoC.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-CqJDIBVr.css">
   </head>
   <body class="bg-gov-ivory text-gov-charcoal antialiased selection:bg-gov-saffron selection:text-white">
     <div id="root"></div>
+    <!-- Register Offline PWA Service Worker -->
+    <script>
+      if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((reg) => console.log('✓ MPLAD PWA Service Worker Registered (Offline Ready):', reg.scope))
+            .catch((err) => console.warn('PWA SW registration notice:', err));
+        });
+      }
+    </script>
   </body>
 </html>

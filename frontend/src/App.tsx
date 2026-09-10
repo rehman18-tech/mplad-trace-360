@@ -25,46 +25,149 @@ import { DepartmentsPage } from './pages/DepartmentsPage';
 
 const AppContent: React.FC = () => {
   const { t } = useLanguage();
-  const [currentPage, setCurrentPage] = useState<string>('landing');
-  const [activeProjectId, setActiveProjectId] = useState<string>('MPLAD-AP-2026-00125');
+
+  // Parse initial route from URL Hash / Search params (e.g. #/projects, #/detail?id=MPLAD-AP-2026-00125)
+  const parseRouteFromUrl = (): { page: string; projectId: string } => {
+    try {
+      const hash = window.location.hash.replace(/^#\/?/, '');
+      if (!hash) return { page: 'landing', projectId: 'MPLAD-AP-2026-00125' };
+
+      const [pathPart, queryPart] = hash.split('?');
+      const page = pathPart || 'landing';
+      let projectId = 'MPLAD-AP-2026-00125';
+
+      if (queryPart) {
+        const params = new URLSearchParams(queryPart);
+        const pid = params.get('id') || params.get('projectId');
+        if (pid) projectId = pid;
+      }
+      return { page, projectId };
+    } catch {
+      return { page: 'landing', projectId: 'MPLAD-AP-2026-00125' };
+    }
+  };
+
+  const initialRoute = parseRouteFromUrl();
+  const [currentPage, setCurrentPage] = useState<string>(initialRoute.page);
+  const [activeProjectId, setActiveProjectId] = useState<string>(initialRoute.projectId);
   const [globalSearch, setGlobalSearch] = useState<string>('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // Sync state changes to browser window.history (pushState)
+  const navigateTo = (page: string, projId?: string, replace = false) => {
+    const targetProjectId = projId || activeProjectId;
+    setCurrentPage(page);
+    if (projId) setActiveProjectId(projId);
+
+    const hashPath = page === 'detail' 
+      ? `/${page}?id=${encodeURIComponent(targetProjectId)}`
+      : `/${page}`;
+
+    const newUrl = `${window.location.pathname}${window.location.search}#${hashPath}`;
+    const stateObj = { page, projectId: targetProjectId };
+
+    if (replace) {
+      window.history.replaceState(stateObj, '', newUrl);
+    } else {
+      // Only push if different from current state to keep forward/backward clean
+      const currentHash = window.location.hash.replace(/^#/, '');
+      if (currentHash !== hashPath) {
+        window.history.pushState(stateObj, '', newUrl);
+      }
+    }
+  };
+
+  // Listen to browser Back and Forward button events (popstate / hashchange)
+  React.useEffect(() => {
+    // Ensure initial entry has proper history state
+    const currentHash = window.location.hash.replace(/^#\/?/, '');
+    const initialHashPath = currentPage === 'detail'
+      ? `/${currentPage}?id=${encodeURIComponent(activeProjectId)}`
+      : `/${currentPage}`;
+
+    if (!currentHash) {
+      window.history.replaceState({ page: currentPage, projectId: activeProjectId }, '', `#${initialHashPath}`);
+    }
+
+    const handlePopState = (event: PopStateEvent) => {
+      if (event.state && event.state.page) {
+        setCurrentPage(event.state.page);
+        if (event.state.projectId) setActiveProjectId(event.state.projectId);
+      } else {
+        const route = parseRouteFromUrl();
+        setCurrentPage(route.page);
+        if (route.projectId) setActiveProjectId(route.projectId);
+      }
+    };
+
+    const handleHashChange = () => {
+      const route = parseRouteFromUrl();
+      setCurrentPage(route.page);
+      if (route.projectId) setActiveProjectId(route.projectId);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    window.addEventListener('hashchange', handleHashChange);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, []);
+
+  // Automatically scroll to the top of the viewport and main container on every page navigation
+  React.useEffect(() => {
+    const scrollToTop = () => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      if (document.documentElement) document.documentElement.scrollTop = 0;
+      if (document.body) document.body.scrollTop = 0;
+      const mainEl = document.querySelector('main');
+      if (mainEl) mainEl.scrollTop = 0;
+      const scrollables = document.querySelectorAll('.overflow-y-auto, .overflow-auto');
+      scrollables.forEach(el => { el.scrollTop = 0; });
+    };
+
+    scrollToTop();
+    const rafId = requestAnimationFrame(scrollToTop);
+    const t1 = setTimeout(scrollToTop, 20);
+    const t2 = setTimeout(scrollToTop, 80);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [currentPage, activeProjectId]);
+
   const handleOpenProject = (id: string) => {
-    setActiveProjectId(id);
-    setCurrentPage('detail');
+    navigateTo('detail', id);
   };
 
   const handleGlobalSearch = (query: string) => {
     const trimmed = query.trim();
     if (!trimmed) return;
     if (trimmed.toUpperCase().startsWith('MPLAD-')) {
-      setActiveProjectId(trimmed);
-      setCurrentPage('detail');
+      handleOpenProject(trimmed);
     } else {
       setGlobalSearch(trimmed);
-      setCurrentPage('projects');
+      navigateTo('projects');
     }
   };
 
   const handleViewOnMap = (id: string) => {
-    setActiveProjectId(id);
-    setCurrentPage('map');
+    navigateTo('map', id);
   };
 
   const handleInspectProject = (id: string) => {
-    setActiveProjectId(id);
-    setCurrentPage('inspection');
+    navigateTo('inspection', id);
   };
 
   const handleFileComplaint = (id: string) => {
-    setActiveProjectId(id);
-    setCurrentPage('complaints');
+    navigateTo('complaints', id);
   };
 
   const handlePrintDossier = (id: string) => {
-    setActiveProjectId(id);
-    setCurrentPage('reports');
+    navigateTo('reports', id);
   };
 
   const renderPage = () => {
@@ -94,7 +197,7 @@ const AppContent: React.FC = () => {
         return (
           <ProjectDetailPage
             projectId={activeProjectId}
-            onBack={() => setCurrentPage('projects')}
+            onBack={() => navigateTo('projects')}
             onInspect={handleInspectProject}
             onComplaint={handleFileComplaint}
             onViewMap={handleViewOnMap}
@@ -123,7 +226,7 @@ const AppContent: React.FC = () => {
       case 'inspection':
         return <FieldInspectionPage initialProjectId={activeProjectId} onOpenProject={handleOpenProject} />;
       case 'complaints':
-        return <CitizenComplaintPage initialProjectId={activeProjectId} onOpenProject={handleOpenProject} />;
+        return <CitizenComplaintPage initialProjectId={activeProjectId} onOpenProject={handleOpenProject} onNavigate={navigateTo} />;
       case 'alerts':
         return <AlertsEscalationPage onOpenProject={handleOpenProject} />;
       case 'reports':
@@ -133,7 +236,7 @@ const AppContent: React.FC = () => {
       case 'admin':
         return <AdminDataPage />;
       default:
-        return <LandingPage onNavigate={setCurrentPage} onOpenProject={handleOpenProject} />;
+        return <LandingPage onNavigate={navigateTo} onOpenProject={handleOpenProject} />;
     }
   };
 
@@ -142,13 +245,13 @@ const AppContent: React.FC = () => {
       <Navbar
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         onSearchSelect={handleGlobalSearch}
-        onNavigate={setCurrentPage}
+        onNavigate={navigateTo}
       />
 
       <div className="flex-1 flex">
         <Sidebar
           currentPage={currentPage}
-          onNavigate={setCurrentPage}
+          onNavigate={navigateTo}
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
         />

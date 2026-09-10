@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../services/api';
+import { api, BACKEND_BASE } from '../services/api';
+import { offlineStorage, OfflineInspection } from '../services/offlineStorage';
 import { Project, DelayPrediction, Inspection, Complaint } from '../types';
 import { RiskBadge } from '../components/common/RiskBadge';
 import { SourceTag } from '../components/common/SourceTag';
@@ -11,6 +12,7 @@ import { PhotoComparison } from '../components/evidence/PhotoComparison';
 import { WhyAmISeeingThis } from '../components/ai/WhyAmISeeingThis';
 import { DelayPredictionCard } from '../components/ai/DelayPredictionCard';
 import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
 import { 
   ArrowLeft, MapPin, Calendar, User, Building, FileText, 
   ShieldCheck, AlertTriangle, Clock, ExternalLink, Printer, 
@@ -37,14 +39,18 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({
   onPrintDossier,
 }) => {
   const { showToast } = useToast();
+  const { isCitizen } = useAuth();
   const [project, setProject] = useState<Project | null>(null);
   const [prediction, setPrediction] = useState<DelayPrediction | null>(null);
+  const [inspections, setInspections] = useState<Inspection[]>([]);
+  const [offlineInspections, setOfflineInspections] = useState<OfflineInspection[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'timeline' | 'funds' | 'evidence' | 'guarantees' | 'disputes'>('overview');
   
   // Interactive Modals
   const [showInspectionModal, setShowInspectionModal] = useState(false);
   const [showComplaintModal, setShowComplaintModal] = useState(false);
+  const [showSignboardModal, setShowSignboardModal] = useState(false);
   const [isScanningAI, setIsScanningAI] = useState(false);
 
   // Inspection form state
@@ -71,8 +77,16 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({
       setInspProgress(proj.physical_progress);
       const pred = await api.getDelayPrediction(projectId);
       setPrediction(pred);
+
+      // Fetch server inspections and local offline inspections for this project
+      const serverInsps = await api.getInspections(projectId);
+      setInspections(serverInsps);
+      const localInsps = offlineStorage.getByProject(projectId);
+      setOfflineInspections(localInsps);
     } catch {
-      // handled
+      // fallback to offline inspections if any
+      const localInsps = offlineStorage.getByProject(projectId);
+      setOfflineInspections(localInsps);
     } finally {
       setLoading(false);
     }
@@ -84,7 +98,7 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({
     showToast('Running 7-factor AI anomaly re-scan against MoSPI benchmarks...', 'info');
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/v1/ai/risk-assessment', {
+      const res = await fetch(`${BACKEND_BASE}/api/v1/ai/risk-assessment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ project_id: project.id })
@@ -216,15 +230,27 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({
             <span>{isScanningAI ? 'Analyzing...' : 'AI Anomaly Scan'}</span>
           </button>
 
-          {/* Quick Inspection Modal Trigger */}
-          <button
-            onClick={() => setShowInspectionModal(true)}
-            className="px-3.5 py-1.5 bg-emerald-700 text-white text-xs font-bold rounded-xl hover:bg-emerald-800 transition-colors flex items-center gap-1.5 shadow-xs"
-            title="Log Official Geotagged Field Inspection"
-          >
-            <Smartphone className="w-3.5 h-3.5" />
-            <span>Log Inspection</span>
-          </button>
+          {/* Citizen-Specific: Digital Signboard & Social Audit Plaque */}
+          {isCitizen ? (
+            <button
+              onClick={() => setShowSignboardModal(true)}
+              className="px-3.5 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-700 text-white text-xs font-bold rounded-xl hover:from-emerald-700 hover:to-teal-800 transition-all flex items-center gap-1.5 shadow-xs"
+              title="View Statutory On-Site Digital Signboard (Social Audit)"
+            >
+              <Award className="w-3.5 h-3.5 text-amber-300" />
+              <span>Digital Signboard (Social Audit)</span>
+            </button>
+          ) : (
+            /* Officer Inspection Trigger */
+            <button
+              onClick={() => setShowInspectionModal(true)}
+              className="px-3.5 py-1.5 bg-emerald-700 text-white text-xs font-bold rounded-xl hover:bg-emerald-800 transition-colors flex items-center gap-1.5 shadow-xs"
+              title="Log Official Geotagged Field Inspection"
+            >
+              <Smartphone className="w-3.5 h-3.5" />
+              <span>Log Inspection</span>
+            </button>
+          )}
 
           {/* Quick Grievance Modal Trigger */}
           <button
@@ -291,10 +317,10 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({
           </div>
 
           {/* Core Status Summary Badge */}
-          <div className="flex flex-col items-end gap-1.5 shrink-0">
-            <div className="text-right">
+          <div className="flex flex-row lg:flex-col items-center lg:items-end justify-between lg:justify-start gap-2 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100">
+            <div className="text-left lg:text-right">
               <span className="text-[10px] uppercase font-bold text-slate-400 block">Sanctioned Value</span>
-              <span className="text-2xl font-extrabold text-gov-navy">
+              <span className="text-xl lg:text-2xl font-extrabold text-gov-navy">
                 {formatIndianCurrency(project.sanctioned_amount)}
               </span>
             </div>
@@ -346,7 +372,7 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({
       </div>
 
       {/* Clean Interactive Tab Switcher */}
-      <div className="bg-white rounded-xl border border-gov-ivory-border p-1.5 shadow-gov flex flex-wrap gap-1 no-print">
+      <div className="bg-white rounded-xl border border-gov-ivory-border p-1.5 shadow-gov flex overflow-x-auto sm:flex-wrap gap-1 no-print scrollbar-none">
         {[
           { id: 'overview', label: 'Overview & AI Health', icon: Layers },
           { id: 'timeline', label: '10-Stage Lifecycle', icon: Clock },
@@ -491,16 +517,61 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({
             fundsReleased={project.funds_released}
             fundsPaid={project.funds_paid}
             actualExpenditure={project.actual_expenditure}
+            physicalProgress={project.physical_progress}
+            financialProgress={project.financial_progress}
+            isFrozen={
+              project.overall_risk_score >= 75 ||
+              project.status === 'STALLED' ||
+              (project.financial_progress - project.physical_progress > 15)
+            }
+            freezeReason={
+              project.status === 'STALLED'
+                ? 'Work flagged as STALLED during field inspection. All contractor disbursals halted.'
+                : project.overall_risk_score >= 75
+                ? `CRITICAL Risk Score (${project.overall_risk_score}/100) detected by MoSPI 7-factor AI engine. Fiscal circuit-breaker engaged.`
+                : project.financial_progress - project.physical_progress > 15
+                ? `Progress discrepancy of ${(project.financial_progress - project.physical_progress).toFixed(1)}% detected. Claimed financial release exceeds verified physical execution.`
+                : undefined
+            }
           />
         </div>
       )}
 
       {/* Tab 4: Field Evidence & Photos */}
-      {activeTab === 'evidence' && (
-        <div className="space-y-6">
-          <PhotoComparison />
-        </div>
-      )}
+      {activeTab === 'evidence' && (() => {
+        // Find latest evidence from offline storage or server inspections
+        const latestOffline = offlineInspections[0];
+        const latestServer = inspections[0];
+
+        // Resolve latest inspection photo
+        const dynamicAfterPhoto = latestOffline?.photo_data_url || (latestServer?.photo_urls && latestServer.photo_urls[0]) || '/images/recent_inspection.jpg';
+        const dynamicVideo = latestOffline?.video_data_url || null;
+        const dynamicVideoName = latestOffline?.video_name || (dynamicVideo ? 'Site_Walkthrough_Verification.mp4' : null);
+        const dynamicStage = latestOffline?.stage || (latestServer ? `Field Inspected Stage (${latestServer.physical_progress_observed}%)` : 'Column Casting & Lintel Stage (72%)');
+        const dynamicDate = latestOffline?.timestamp 
+          ? new Date(latestOffline.timestamp).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+          : (latestServer?.inspection_date || '18 Feb 2026');
+        const dynamicCVScore = latestServer?.ai_cv_similarity_score ? Math.round(latestServer.ai_cv_similarity_score * 100) : 88;
+        const dynamicGPSVariance = latestServer?.distance_variance_meters || (latestOffline?.accuracy_m ? Math.round(latestOffline.accuracy_m * 10) / 10 : 12.4);
+        const dynamicAiNotes = latestServer?.ai_verification_notes || latestOffline?.notes;
+
+        return (
+          <div className="space-y-6">
+            <PhotoComparison
+              afterUrl={dynamicAfterPhoto}
+              afterStage={dynamicStage}
+              afterDate={dynamicDate}
+              similarityScore={dynamicCVScore}
+              gpsVariance={dynamicGPSVariance}
+              videoUrl={dynamicVideo}
+              videoName={dynamicVideoName}
+              inspections={inspections}
+              offlineInspections={offlineInspections}
+              aiNotes={dynamicAiNotes}
+            />
+          </div>
+        );
+      })()}
 
       {/* Tab 5: Guarantees & PBG */}
       {activeTab === 'guarantees' && (
@@ -594,7 +665,10 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({
 
       {/* Quick Field Inspection Modal */}
       {showInspectionModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div 
+          onClick={(e) => { if (e.target === e.currentTarget) setShowInspectionModal(false); }}
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4"
+        >
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
               <div className="flex items-center gap-2">
@@ -697,7 +771,10 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({
 
       {/* Quick Citizen Grievance Modal */}
       {showComplaintModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div 
+          onClick={(e) => { if (e.target === e.currentTarget) setShowComplaintModal(false); }}
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4"
+        >
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
               <div className="flex items-center gap-2">
@@ -779,6 +856,119 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Citizen Digital Signboard & Social Audit Modal */}
+      {showSignboardModal && project && (
+        <div 
+          onClick={(e) => { if (e.target === e.currentTarget) setShowSignboardModal(false); }}
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50"
+        >
+          <div className="bg-white rounded-3xl max-w-xl w-full border border-amber-300 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* National Header */}
+            <div className="bg-gradient-to-r from-emerald-800 via-teal-900 to-slate-900 text-white p-5 flex items-center justify-between border-b border-amber-300/40">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-amber-400/20 border border-amber-300/40 flex items-center justify-center">
+                  <Award className="w-5 h-5 text-amber-300" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-sm tracking-wide text-amber-200">
+                    STATUTORY DIGITAL SIGNBOARD (SOCIAL AUDIT)
+                  </h3>
+                  <p className="text-[11px] text-slate-300">As mandated by Section 3.16 of MoSPI MPLADS Guidelines</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowSignboardModal(false)}
+                className="p-1 rounded-lg text-slate-300 hover:text-white hover:bg-white/10"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Simulated Stone Plaque */}
+            <div className="p-6 bg-gradient-to-b from-[#FFFDF9] to-[#F7F3EB] space-y-4">
+              <div className="p-5 rounded-2xl bg-white border-2 border-dashed border-amber-300 shadow-xs space-y-3 font-sans text-xs">
+                <div className="text-center pb-2 border-b border-amber-200">
+                  <span className="text-[10px] font-mono font-bold tracking-widest text-slate-500 uppercase block">Government of India • MPLADS Scheme</span>
+                  <h4 className="text-sm font-black text-gov-navy uppercase tracking-tight mt-0.5">{project.title}</h4>
+                  <span className="text-[11px] font-mono text-emerald-800 font-bold">{project.id}</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 text-[11px]">
+                  <div>
+                    <span className="text-slate-400 block font-medium">Constituency &amp; State</span>
+                    <span className="font-bold text-slate-800">{project.constituency}, {project.state}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block font-medium">Recommended By</span>
+                    <span className="font-bold text-slate-800">Shri {project.mp_name} ({project.mp_house})</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block font-medium">Sanctioned Amount</span>
+                    <span className="font-extrabold text-gov-navy text-xs">{formatIndianCurrency(project.sanctioned_amount)}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block font-medium">Implementing Agency</span>
+                    <span className="font-bold text-slate-800">{project.implementing_agency}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block font-medium">Target Completion Date</span>
+                    <span className="font-bold text-slate-800">{project.expected_completion_date}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block font-medium">Verified Ground Progress</span>
+                    <span className="font-extrabold text-emerald-700 text-xs">{project.physical_progress}% Execution</span>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-amber-100 flex items-center justify-between text-[10px] text-slate-500">
+                  <span>GPS Coordinates: {project.latitude}, {project.longitude}</span>
+                  <span className="text-emerald-700 font-bold">● Public Asset Active</span>
+                </div>
+              </div>
+
+              {/* Citizen Social Audit Interactivity */}
+              <div className="p-4 rounded-xl bg-amber-50/80 border border-amber-200/90 space-y-2.5">
+                <p className="text-xs font-bold text-amber-950 flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                  <span>Citizen Social Audit Verification (Right to Know)</span>
+                </p>
+                <p className="text-[11px] text-slate-600">
+                  Are you physically present at this site? Compare the signboard details above with the real ground status.
+                </p>
+
+                <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowSignboardModal(false);
+                      showToast('✓ Citizen Social Audit recorded: Ground progress confirmed by community member.', 'success');
+                    }}
+                    className="flex-1 py-2 px-3 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-200" />
+                    <span>Confirm Work Matches Reality</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowSignboardModal(false);
+                      setShowComplaintModal(true);
+                      setCmpCategory('Discrepancy in executed dimensions');
+                      setCmpDesc(`Social Audit Discrepancy: Signboard states ${project.physical_progress}% progress and target date ${project.expected_completion_date}, but on-ground inspection shows incomplete/delayed work.`);
+                    }}
+                    className="flex-1 py-2 px-3 bg-rose-50 hover:bg-rose-100 border border-rose-300 text-rose-800 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5"
+                  >
+                    <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
+                    <span>Report Discrepancy / Fake Work</span>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

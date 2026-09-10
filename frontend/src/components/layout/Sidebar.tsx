@@ -7,6 +7,8 @@ import {
   BellRing, FileCheck, Files, History, Settings, ChevronRight, Layers
 } from 'lucide-react';
 
+import { UserRole } from '../../types';
+
 interface SidebarProps {
   currentPage: string;
   onNavigate: (page: string) => void;
@@ -18,28 +20,39 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpe
   const { role } = useAuth();
   const { t } = useLanguage();
 
-  const navItems = [
+  const navItems: Array<{
+    id: string;
+    label: string;
+    icon: any;
+    categoryKey: string;
+    categoryLabel: string;
+    badge?: string;
+    badgeType?: string;
+    allowedRoles?: UserRole[];
+  }> = [
     { id: 'landing', label: t('nav_landing'), icon: LayoutDashboard, categoryKey: 'cat_core', categoryLabel: t('cat_core') },
     { id: 'departments', label: t('nav_departments'), icon: Layers, categoryKey: 'cat_core', categoryLabel: t('cat_core'), badge: '8', badgeType: 'info' },
     { id: 'projects', label: t('nav_projects'), icon: FolderKanban, categoryKey: 'cat_core', categoryLabel: t('cat_core') },
     { id: 'map', label: t('nav_map'), icon: MapPin, categoryKey: 'cat_core', categoryLabel: t('cat_core') },
-    { id: 'funds', label: t('nav_funds'), icon: IndianRupee, categoryKey: 'cat_financials', categoryLabel: t('cat_financials') },
-    { id: 'contracts', label: t('nav_contracts'), icon: FileText, categoryKey: 'cat_financials', categoryLabel: t('cat_financials') },
-    { id: 'contractors', label: t('nav_contractors'), icon: Users, categoryKey: 'cat_financials', categoryLabel: t('cat_financials') },
-    { id: 'ai-risk', label: t('nav_ai_risk'), icon: AlertTriangle, badge: '24', badgeType: 'alert', categoryKey: 'cat_intelligence', categoryLabel: t('cat_intelligence') },
-    { id: 'disputes', label: t('nav_disputes'), icon: Scale, badge: '8', badgeType: 'warning', categoryKey: 'cat_intelligence', categoryLabel: t('cat_intelligence') },
-    { id: 'guarantees', label: t('nav_guarantees'), icon: ShieldAlert, badge: '4', badgeType: 'critical', categoryKey: 'cat_intelligence', categoryLabel: t('cat_intelligence') },
-    { id: 'inspection', label: t('nav_inspections'), icon: Smartphone, categoryKey: 'cat_ground_ops', categoryLabel: t('cat_ground_ops') },
+    { id: 'funds', label: t('nav_funds'), icon: IndianRupee, categoryKey: 'cat_financials', categoryLabel: t('cat_financials'), allowedRoles: ['CITIZEN', 'DISTRICT_AUTHORITY', 'ADMIN'] },
+    { id: 'contracts', label: t('nav_contracts'), icon: FileText, categoryKey: 'cat_financials', categoryLabel: t('cat_financials'), allowedRoles: ['FIELD_OFFICER', 'DISTRICT_AUTHORITY', 'ADMIN'] },
+    { id: 'contractors', label: t('nav_contractors'), icon: Users, categoryKey: 'cat_financials', categoryLabel: t('cat_financials'), allowedRoles: ['DISTRICT_AUTHORITY', 'ADMIN'] },
+    { id: 'ai-risk', label: t('nav_ai_risk'), icon: AlertTriangle, badge: '24', badgeType: 'alert', categoryKey: 'cat_intelligence', categoryLabel: t('cat_intelligence'), allowedRoles: ['DISTRICT_AUTHORITY', 'ADMIN'] },
+    { id: 'disputes', label: t('nav_disputes'), icon: Scale, badge: '8', badgeType: 'warning', categoryKey: 'cat_intelligence', categoryLabel: t('cat_intelligence'), allowedRoles: ['DISTRICT_AUTHORITY', 'ADMIN'] },
+    { id: 'guarantees', label: t('nav_guarantees'), icon: ShieldAlert, badge: '4', badgeType: 'critical', categoryKey: 'cat_intelligence', categoryLabel: t('cat_intelligence'), allowedRoles: ['DISTRICT_AUTHORITY', 'ADMIN'] },
+    { id: 'inspection', label: t('nav_inspections'), icon: Smartphone, categoryKey: 'cat_ground_ops', categoryLabel: t('cat_ground_ops'), allowedRoles: ['FIELD_OFFICER', 'DISTRICT_AUTHORITY'] },
     { id: 'complaints', label: t('nav_complaints'), icon: MessageSquareQuote, categoryKey: 'cat_ground_ops', categoryLabel: t('cat_ground_ops') },
-    { id: 'alerts', label: t('nav_alerts'), icon: BellRing, badge: '12', badgeType: 'alert', categoryKey: 'cat_governance', categoryLabel: t('cat_governance') },
+    { id: 'alerts', label: t('nav_alerts'), icon: BellRing, badge: '12', badgeType: 'alert', categoryKey: 'cat_governance', categoryLabel: t('cat_governance'), allowedRoles: ['DISTRICT_AUTHORITY', 'ADMIN'] },
     { id: 'reports', label: t('nav_reports'), icon: FileCheck, categoryKey: 'cat_governance', categoryLabel: t('cat_governance') },
-    { id: 'documents', label: t('nav_documents'), icon: Files, categoryKey: 'cat_governance', categoryLabel: t('cat_governance') },
-    { id: 'audit', label: t('nav_audit'), icon: History, categoryKey: 'cat_administration', categoryLabel: t('cat_administration') },
-    { id: 'admin', label: t('nav_admin'), icon: Settings, categoryKey: 'cat_administration', categoryLabel: t('cat_administration') },
+    { id: 'audit', label: t('nav_audit'), icon: History, categoryKey: 'cat_administration', categoryLabel: t('cat_administration'), allowedRoles: ['ADMIN'] },
+    { id: 'admin', label: t('nav_admin'), icon: Settings, categoryKey: 'cat_administration', categoryLabel: t('cat_administration'), allowedRoles: ['ADMIN'] },
   ];
 
+  // Filter items based on active role permissions
+  const filteredNavItems = navItems.filter(item => !item.allowedRoles || item.allowedRoles.includes(role));
+
   // Group by categoryKey
-  const categoryKeys = Array.from(new Set(navItems.map(item => item.categoryKey)));
+  const categoryKeys = Array.from(new Set(filteredNavItems.map(item => item.categoryKey)));
 
   return (
     <>
@@ -52,13 +65,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpe
       )}
 
       <aside
-        className={`fixed lg:sticky top-[53px] left-0 h-[calc(100vh-53px)] w-64 bg-[#FCFAF7]/95 backdrop-blur-md border-r border-amber-200/80 flex flex-col z-30 transition-transform duration-300 ease-in-out ${
+        className={`fixed lg:sticky top-[53px] left-0 h-[calc(100dvh-53px)] max-h-[calc(100dvh-53px)] w-64 bg-[#FCFAF7]/95 backdrop-blur-md border-r border-amber-200/80 flex flex-col z-30 transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
-        <div className="flex-1 overflow-y-auto py-4 px-3 space-y-4 no-scrollbar">
+        <div className="flex-1 overflow-y-auto py-4 px-3 space-y-4">
           {categoryKeys.map((catKey) => {
-            const catItems = navItems.filter(item => item.categoryKey === catKey);
+            const catItems = filteredNavItems.filter(item => item.categoryKey === catKey);
             const catTitle = catItems[0]?.categoryLabel || t(catKey);
             return (
               <div key={catKey}>
@@ -115,7 +128,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpe
         </div>
 
         {/* Sidebar Footer: System Status */}
-        <div className="p-3 bg-[#F7F3EB] border-t border-amber-200/80 text-xs">
+        <div className="p-3 bg-[#F7F3EB] border-t border-amber-200/80 text-xs shrink-0">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-slate-700">PFMS Node Latency</span>
             <span className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">

@@ -163,7 +163,7 @@ export const PublicExplorer: React.FC<PublicExplorerProps> = ({
         </div>
 
         {/* 8 Department Quick Filter Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto py-3.5 no-scrollbar border-b border-amber-100">
+        <div className="flex items-center gap-2 overflow-x-auto py-3 border-b border-amber-100">
           <span className="text-xs font-mono font-bold text-amber-950 uppercase tracking-widest text-[10px] shrink-0 pr-1">
             Department:
           </span>
@@ -206,7 +206,7 @@ export const PublicExplorer: React.FC<PublicExplorerProps> = ({
               placeholder={t('search_placeholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-[#FAF7F0] border border-amber-200/90 focus:border-amber-500 rounded-2xl pl-11 pr-32 py-3 text-xs md:text-sm text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 transition-all shadow-inner"
+              className="w-full bg-[#FAF7F0] border border-amber-200/90 focus:border-amber-500 rounded-2xl pl-10 sm:pl-11 pr-24 sm:pr-48 py-3 text-xs md:text-sm text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 transition-all shadow-inner"
             />
             {search && (
               <button
@@ -216,28 +216,28 @@ export const PublicExplorer: React.FC<PublicExplorerProps> = ({
                   fetchProjects('');
                   showToast('Search query cleared', 'info');
                 }}
-                className="absolute right-24 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 text-xs font-bold px-1.5 py-0.5 rounded bg-amber-100 hover:bg-amber-200 transition-colors"
+                className="absolute right-16 sm:right-28 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-800 text-xs font-bold px-2 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 transition-colors shadow-2xs"
                 title="Clear Search"
               >
-                ✕ {t('clear_button')}
+                ✕ <span className="hidden sm:inline">{t('clear_button')}</span>
               </button>
             )}
             <button
               type="submit"
-              className="absolute right-2 top-1/2 -translate-y-1/2 px-5 py-2 bg-gradient-to-r from-orange-600 via-amber-600 to-orange-700 hover:from-orange-700 hover:to-amber-700 text-white font-bold text-xs rounded-xl transition-all shadow-sm flex items-center gap-1.5"
+              className="absolute right-2 top-1/2 -translate-y-1/2 px-3 sm:px-5 py-2 bg-gradient-to-r from-orange-600 via-amber-600 to-orange-700 hover:from-orange-700 hover:to-amber-700 text-white font-bold text-xs rounded-xl transition-all shadow-sm flex items-center gap-1.5"
             >
               <Search className="w-3.5 h-3.5" />
-              <span>{t('search_button')}</span>
+              <span className="hidden xs:inline">{t('search_button')}</span>
             </button>
           </div>
         </form>
 
         {/* Filter Dropdowns */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 text-xs">
           <select
             value={selectedState}
             onChange={(e) => { setSelectedState(e.target.value); setSelectedDistrict(''); }}
-            className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-700 font-medium focus:outline-none"
+            className="bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-700 font-medium focus:outline-none focus:ring-1 focus:ring-amber-500"
           >
             <option value="">All States ({uniqueStates.length || 10})</option>
             {uniqueStates.map(s => (
@@ -249,7 +249,7 @@ export const PublicExplorer: React.FC<PublicExplorerProps> = ({
             value={selectedDistrict}
             onChange={(e) => setSelectedDistrict(e.target.value)}
             disabled={!selectedState}
-            className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-700 font-medium focus:outline-none disabled:opacity-50"
+            className="bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-700 font-medium focus:outline-none focus:ring-1 focus:ring-amber-500 disabled:opacity-50"
           >
             <option value="">{selectedState ? `All Districts in ${selectedState}` : 'Select State First'}</option>
             {uniqueDistricts.map(d => (
@@ -260,7 +260,7 @@ export const PublicExplorer: React.FC<PublicExplorerProps> = ({
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-700 font-medium focus:outline-none"
+            className="bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-700 font-medium focus:outline-none focus:ring-1 focus:ring-amber-500"
           >
             <option value="">All Execution Statuses</option>
             <option value="UNDER PROGRESS">Under Progress</option>
@@ -271,7 +271,7 @@ export const PublicExplorer: React.FC<PublicExplorerProps> = ({
           <select
             value={selectedRisk}
             onChange={(e) => setSelectedRisk(e.target.value)}
-            className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-700 font-medium focus:outline-none"
+            className="bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-700 font-medium focus:outline-none focus:ring-1 focus:ring-amber-500"
           >
             <option value="">All AI Risk Levels</option>
             <option value="NORMAL">Normal (&lt;30)</option>
@@ -279,10 +279,57 @@ export const PublicExplorer: React.FC<PublicExplorerProps> = ({
             <option value="HIGH RISK">High Risk (50-74)</option>
             <option value="CRITICAL">Critical (75-100)</option>
           </select>
+        </div>
 
-          <div className="flex items-center text-[11px] text-slate-500 font-semibold px-3 py-1.5 bg-slate-50 rounded-lg border border-slate-200 justify-between">
-            <span>Matching Works:</span>
-            <strong className="text-gov-navy text-xs">{projects.length}</strong>
+        {/* Filter Summary & Matching Count Bar */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-3 mt-1 border-t border-amber-100/70 text-xs">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-slate-500 font-medium">Active Filters:</span>
+            {(selectedState || selectedCategory || selectedStatus || selectedRisk || search) ? (
+              <div className="flex flex-wrap items-center gap-1.5">
+                {selectedCategory && (
+                  <span className="bg-amber-100 text-amber-900 px-2 py-0.5 rounded-md font-bold text-[11px]">
+                    Dept: {selectedCategory}
+                  </span>
+                )}
+                {selectedState && (
+                  <span className="bg-blue-100 text-blue-900 px-2 py-0.5 rounded-md font-bold text-[11px]">
+                    State: {selectedState}
+                  </span>
+                )}
+                {selectedDistrict && (
+                  <span className="bg-blue-50 text-blue-800 px-2 py-0.5 rounded-md font-bold text-[11px]">
+                    District: {selectedDistrict}
+                  </span>
+                )}
+                {selectedStatus && (
+                  <span className="bg-slate-100 text-slate-800 px-2 py-0.5 rounded-md font-bold text-[11px]">
+                    Status: {selectedStatus}
+                  </span>
+                )}
+                {selectedRisk && (
+                  <span className="bg-rose-100 text-rose-800 px-2 py-0.5 rounded-md font-bold text-[11px]">
+                    Risk: {selectedRisk}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={resetFilters}
+                  className="text-xs text-orange-600 underline font-semibold ml-1 hover:text-orange-800"
+                >
+                  Clear all
+                </button>
+              </div>
+            ) : (
+              <span className="text-slate-400 italic text-[11px]">None (Showing nationwide works)</span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2 font-mono text-xs">
+            <span className="text-slate-500">Matching Works:</span>
+            <span className="font-extrabold text-gov-navy px-3 py-1 bg-amber-100/80 rounded-lg border border-amber-300">
+              {projects.length} Total
+            </span>
           </div>
         </div>
       </div>

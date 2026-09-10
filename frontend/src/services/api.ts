@@ -1,7 +1,8 @@
-import { Project, Contractor, Alert, Complaint, Dispute, Guarantee, DuplicateCandidate, AuditLog, OverviewAnalytics, DelayPrediction } from '../types';
+import { Project, Contractor, Alert, Complaint, Dispute, Guarantee, DuplicateCandidate, AuditLog, OverviewAnalytics, DelayPrediction, Inspection } from '../types';
 import { INITIAL_PROJECTS, INITIAL_CONTRACTORS, INITIAL_DUPLICATES, INITIAL_AUDIT_LOGS } from './mockData';
 
-const BACKEND_URL = 'http://127.0.0.1:8000/api';
+export const BACKEND_BASE = (((import.meta as any).env?.VITE_API_URL as string) || 'http://127.0.0.1:8000').replace(/\/+$/, '');
+const BACKEND_URL = `${BACKEND_BASE}/api`;
 const TIMEOUT_MS = 3500;
 
 // LocalStorage helpers for offline persistence
@@ -123,10 +124,17 @@ export const api = {
       setStored(STORAGE_KEYS.ALERTS, data);
       return data;
     } catch {
+      const storedAlerts = getStored<Alert[]>(STORAGE_KEYS.ALERTS, []);
       const allProjects = getStored<Project[]>(STORAGE_KEYS.PROJECTS, INITIAL_PROJECTS);
-      const alerts: Alert[] = [];
+      const alerts: Alert[] = [...storedAlerts];
       allProjects.forEach(p => {
-        if (p.alerts) alerts.push(...p.alerts);
+        if (p.alerts) {
+          p.alerts.forEach(a => {
+            if (!alerts.some(existing => existing.id === a.id)) {
+              alerts.push(a);
+            }
+          });
+        }
       });
       return alerts;
     }
@@ -171,6 +179,15 @@ export const api = {
   },
 
   // Inspections
+  async getInspections(projectId?: string): Promise<Inspection[]> {
+    try {
+      const url = projectId ? `/inspections?project_id=${projectId}` : '/inspections';
+      return await apiFetch<Inspection[]>(url);
+    } catch {
+      return [];
+    }
+  },
+
   async submitInspection(data: {
     project_id: string;
     officer_name: string;
@@ -229,6 +246,14 @@ export const api = {
       });
     } catch {
       const cmpId = `CMP-2026-${Math.floor(10000 + Math.random() * 90000)}`;
+      const projects = getStored<Project[]>(STORAGE_KEYS.PROJECTS, INITIAL_PROJECTS);
+      const proj = projects.find(p => p.id === data.project_id);
+      const isDefect = /damage|poor quality|collapse|crack|stalled|incomplete|defect|failure/i.test(data.category + ' ' + data.description);
+
+      const assignedAuthority = isDefect
+        ? 'District Collector & Chief Vigilance Officer'
+        : 'District Grievance Redressal Nodal Officer';
+
       const newCmp: Complaint = {
         id: cmpId,
         project_id: data.project_id,
@@ -241,12 +266,46 @@ export const api = {
         location: data.location,
         submission_date: new Date().toISOString().slice(0, 10),
         status: 'AI_CLASSIFIED',
-        assigned_to: 'District Grievance Redressal Nodal Officer',
-        resolution_notes: 'Grievance received and auto-routed for field inspection.'
+        assigned_to: assignedAuthority,
+        resolution_notes: isDefect
+          ? `Escalated to Higher Authority. Defect notice registered against contractor ${proj?.contractor_name || 'Executing Agency'}. PBG flagged.`
+          : 'Grievance received and auto-routed for field inspection.'
       };
       const existing = getStored<Complaint[]>(STORAGE_KEYS.COMPLAINTS, []);
       existing.unshift(newCmp);
       setStored(STORAGE_KEYS.COMPLAINTS, existing);
+
+      // If defect, also register in local alerts
+      if (isDefect && proj) {
+        const alerts = getStored<Alert[]>(STORAGE_KEYS.ALERTS, []);
+        const newAlert: Alert = {
+          id: `ALT-DEFECT-${cmpId.slice(-5)}`,
+          project_id: proj.id,
+          project_title: proj.title,
+          severity: 'CRITICAL',
+          category: 'Guarantee Alert',
+          title: `Statutory Defect Notice: ${proj.contractor_name || 'Contractor'}`,
+          description: `Citizen photo grievance filed (#${cmpId}) with GPS verification. Defect liability invoked against executing agency ${proj.contractor_name}.`,
+          observed_data: `Citizen report: '${data.category}' at ${data.location}. Photo evidence attached.`,
+          expected_data: 'Defect-free structural handover conforming to CPWD/MoSPI Clause 4.2',
+          difference: 'Breach of statutory warranty. PBG placed on freeze hold.',
+          confidence_score: 0.96,
+          recommended_action: `Dispatch Executive Engineer for joint audit. Freeze ₹${((proj.contract_amount || 2500000) * 0.05).toLocaleString('en-IN')} PBG escrow.`,
+          escalation_level: 'Level 4 - District Collector & Chief Vigilance Officer',
+          assigned_authority: 'District Collector / Superintending Engineer PWD',
+          due_days: 3,
+          status: 'ACTION_REQUIRED',
+          created_at: new Date().toISOString().slice(0, 16).replace('T', ' '),
+          audit_history: [{
+            time: new Date().toISOString().slice(0, 16).replace('T', ' '),
+            action: `Auto-escalated to District Collector under CPWD Clause 4.2 Defect Liability. Contractor: ${proj.contractor_name}`,
+            actor: 'AI Fiscal Surveillance Engine'
+          }]
+        };
+        alerts.unshift(newAlert);
+        setStored(STORAGE_KEYS.ALERTS, alerts);
+      }
+
       return newCmp;
     }
   },

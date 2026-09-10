@@ -6,6 +6,34 @@
   body {
     @apply font-sans antialiased text-slate-800 bg-[#F8FAFC];
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* Prevent blinking caret and text I-beam on non-input elements */
+  *:not(input):not(textarea):not([contenteditable="true"]) {
+    caret-color: transparent !important;
+  }
+
+  *:not(input):not(textarea):not([contenteditable="true"]):focus {
+    caret-color: transparent !important;
+  }
+
+  body, div, p, span, h1, h2, h3, h4, h5, h6, table, tr, td, th, ul, li, section, article, header, nav, aside, footer {
+    cursor: default;
+  }
+
+  button, a, [role="button"], select, .cursor-pointer {
+    cursor: pointer !important;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  input, textarea, [contenteditable="true"] {
+    cursor: text !important;
+    caret-color: auto !important;
+    user-select: text !important;
+    -webkit-user-select: text !important;
   }
 }
 

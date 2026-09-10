@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Language } from '../types';
+import { translateDOM, PHRASE_DICTIONARY, REVERSE_DICTIONARY, REVERSE_ENTRIES } from './phraseTranslations';
 
 interface LanguageContextType {
   language: Language;
@@ -7,15 +8,7 @@ interface LanguageContextType {
   t: (key: string, fallback?: string) => string;
 }
 
-export const LANGUAGE_LABELS: Record<Language, { native: string; english: string; code: string }> = {
-  en: { native: "English", english: "English", code: "EN" },
-  hi: { native: "हिंदी", english: "Hindi", code: "HI" },
-  te: { native: "తెలుగు", english: "Telugu", code: "TE" },
-  ta: { native: "தமிழ்", english: "Tamil", code: "TA" },
-  bn: { native: "বাংলা", english: "Bengali", code: "BN" },
-  mr: { native: "मराठी", english: "Marathi", code: "MR" },
-  kn: { native: "ಕನ್ನಡ", english: "Kannada", code: "KN" },
-};
+import { LANGUAGE_LABELS } from '../constants/languages';
 
 const DICTIONARY: Record<Language, Record<string, string>> = {
   en: {
@@ -65,15 +58,16 @@ const DICTIONARY: Record<Language, Record<string, string>> = {
     hero_radar_desc: "24/7 Autonomous Geofence Surveillance",
     hero_national_case_study: "Flagship National Case Study",
 
-    mission_water: "जल जीवन मिशन (Drinking Water)",
-    mission_edu: "समग्र शिक्षा (Education)",
-    mission_health: "स्वास्थ्य मिशन (Healthcare)",
-    mission_roads: "ग्राम सड़क व PWD (Roads)",
-    mission_solar: "सौर ऊर्जा (Solar Energy)",
-    mission_irrigation: "अमृत सरोवर (Irrigation)",
-    mission_sanitation: "स्वच्छ भारत (Sanitation)",
-    mission_community: "सामुदायिक अवसंरचना (Community)",
+    mission_water: "Drinking Water (JJM)",
+    mission_edu: "Education",
+    mission_health: "Healthcare (NHM)",
+    mission_roads: "Roads & PWD",
+    mission_solar: "Solar Energy",
+    mission_irrigation: "Irrigation & Water Bodies",
+    mission_sanitation: "Sanitation (Swachh Bharat)",
+    mission_community: "Community Infrastructure",
 
+    nav_search_placeholder: "Search works, MPs, IDs...",
     search_placeholder: "Search by Project ID, Title, Village, District, Contractor or MP...",
     search_button: "Search",
     clear_button: "Clear",
@@ -734,6 +728,31 @@ const DICTIONARY: Record<Language, Record<string, string>> = {
   }
 };
 
+// Synchronize key-based DICTIONARY into PHRASE_DICTIONARY and REVERSE_DICTIONARY
+try {
+  (['hi', 'te', 'ta', 'bn', 'mr', 'kn'] as Language[]).forEach(lang => {
+    const dict = DICTIONARY[lang];
+    const enDict = DICTIONARY.en;
+    if (dict && enDict && PHRASE_DICTIONARY[lang]) {
+      for (const [key, localized] of Object.entries(dict)) {
+        const enPhrase = enDict[key];
+        if (enPhrase && localized && localized.trim() !== enPhrase.trim()) {
+          const trimmedEn = enPhrase.trim();
+          const trimmedLoc = localized.trim();
+          PHRASE_DICTIONARY[lang][trimmedEn] = trimmedLoc;
+          REVERSE_DICTIONARY[trimmedLoc] = trimmedEn;
+        }
+      }
+    }
+  });
+
+  const newEntries = Object.entries(REVERSE_DICTIONARY).sort((a, b) => b[0].length - a[0].length);
+  REVERSE_ENTRIES.length = 0;
+  REVERSE_ENTRIES.push(...newEntries);
+} catch {
+  // safe fallback
+}
+
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -751,6 +770,10 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const t = (key: string, fallback?: string): string => {
+    const trimmed = key ? key.trim() : '';
+    if (PHRASE_DICTIONARY[language] && PHRASE_DICTIONARY[language][trimmed]) {
+      return PHRASE_DICTIONARY[language][trimmed];
+    }
     if (DICTIONARY[language] && DICTIONARY[language][key]) {
       return DICTIONARY[language][key];
     }
@@ -759,6 +782,55 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
     return fallback || key;
   };
+
+  // Run DOM internationalization whenever language changes or DOM updates
+  useEffect(() => {
+    let timeoutId: any;
+    let isTranslating = false;
+
+    const runTranslation = () => {
+      if (isTranslating) return;
+      isTranslating = true;
+      try {
+        translateDOM(language);
+      } finally {
+        isTranslating = false;
+      }
+    };
+
+    // Run immediately on render or language change, and subsequent passes for deferred subcomponents
+    runTranslation();
+    const t1 = setTimeout(runTranslation, 50);
+    const t2 = setTimeout(runTranslation, 200);
+
+    // Observe DOM mutations to dynamically translate new elements (navigation, modals, tables)
+    const observer = new MutationObserver((mutations) => {
+      if (isTranslating) return;
+      let shouldTranslate = false;
+      for (const m of mutations) {
+        if (m.type === 'childList' && m.addedNodes.length > 0) {
+          shouldTranslate = true;
+          break;
+        }
+      }
+      if (shouldTranslate) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(runTranslation, 40);
+      }
+    });
+
+    const root = document.getElementById('root') || document.body;
+    if (root) {
+      observer.observe(root, { childList: true, subtree: true });
+    }
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(timeoutId);
+      observer.disconnect();
+    };
+  }, [language]);
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t }}>

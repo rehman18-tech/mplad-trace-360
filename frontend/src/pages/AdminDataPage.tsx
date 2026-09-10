@@ -1,23 +1,36 @@
-import React, { useState } from 'react';
-import { Settings, Upload, CheckCircle2, ShieldCheck, Database, RefreshCw, Cpu, Layers } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Settings, Upload, CheckCircle2, ShieldCheck, Database, RefreshCw, Cpu, Layers, FileSpreadsheet } from 'lucide-react';
+import { useToast } from '../context/ToastContext';
 
 export const AdminDataPage: React.FC = () => {
+  const { showToast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [costThreshold, setCostThreshold] = useState(15);
   const [delayDaysHigh, setDelayDaysHigh] = useState(45);
   const [delayDaysCritical, setDelayDaysCritical] = useState(90);
   const [guaranteeLeadDays, setGuaranteeLeadDays] = useState(30);
   const [duplicateRadiusMeters, setDuplicateRadiusMeters] = useState(250);
   const [importStatus, setImportStatus] = useState<string | null>(null);
+  const [selectedFileName, setSelectedFileName] = useState<string>('sample_district_sanctions_2026.csv');
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setSelectedFileName(file.name);
+      showToast(`Selected file: ${file.name}`, 'info');
+    }
+  };
 
   const handleSimulateCSVImport = () => {
-    setImportStatus("Validating CSV headers, coordinates, and INR schema...");
+    setImportStatus(`Validating schema, coordinates & financial bounds for ${selectedFileName}...`);
     setTimeout(() => {
-      setImportStatus("✓ Success: 24 new MPLADS records validated & ingested into PostgreSQL schema without duplicate conflicts.");
-    }, 1500);
+      setImportStatus(`✓ Success: All records from ${selectedFileName} validated & ingested into PostgreSQL schema without duplicate conflicts.`);
+      showToast('Batch dataset successfully ingested and synced across all dashboards!', 'success');
+    }, 1200);
   };
 
   const handleSaveRules = () => {
-    alert("Risk thresholds updated in PostgreSQL engine and surveillance cron triggers.");
+    showToast('Surveillance risk thresholds updated & deployed to automated cron workers.', 'success');
   };
 
   const dataSources = [
@@ -96,17 +109,34 @@ export const AdminDataPage: React.FC = () => {
           Administrative gateway to upload sanctioned works from state engineering divisions. Ingestion engine validates mandatory GPS coordinates, Indian rupee bounds, and MP constituency keys before database insertion.
         </p>
 
-        <div className="p-6 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 text-center">
-          <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-          <p className="font-bold text-gov-navy text-xs mb-1">Select or Drag CSV / JSON Sanction Export</p>
-          <p className="text-[11px] text-slate-500 mb-4">sample_district_sanctions_2026.csv (Format: MoSPI Schema v2.1)</p>
-          <button
-            type="button"
-            onClick={handleSimulateCSVImport}
-            className="px-5 py-2.5 bg-gov-navy text-white text-xs font-bold rounded-lg hover:bg-gov-navy-light transition-colors shadow-xs"
-          >
-            Run Pre-Validation & Ingest Batch
-          </button>
+        <div 
+          onClick={() => fileInputRef.current?.click()}
+          className="p-6 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 text-center cursor-pointer hover:border-gov-navy hover:bg-slate-100/60 transition-all"
+        >
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleFileChange} 
+            accept=".csv,.json,.xlsx" 
+            className="hidden" 
+          />
+          <Upload className="w-8 h-8 text-gov-navy mx-auto mb-2" />
+          <p className="font-bold text-gov-navy text-xs mb-1">Click to Browse or Drag Official MoSPI CSV / JSON</p>
+          <p className="text-[11px] font-mono text-slate-600 mb-4 bg-white inline-block px-3 py-1 rounded border border-slate-200">
+            Selected: <strong>{selectedFileName}</strong>
+          </p>
+          <div>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleSimulateCSVImport();
+              }}
+              className="px-5 py-2.5 bg-gov-navy hover:bg-gov-navy-light text-white text-xs font-bold rounded-lg transition-colors shadow-xs"
+            >
+              Run Pre-Validation &amp; Ingest Batch
+            </button>
+          </div>
         </div>
 
         {importStatus && (

@@ -1,0 +1,171 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="100%" height="100%" style="background:#f8fafc; font-family:'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0f172a" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0B2545"/>
+      <stop offset="100%" stop-color="#1E3A8A"/>
+    </linearGradient>
+    <linearGradient id="stage1Grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#10B981"/>
+    </linearGradient>
+    <linearGradient id="stage2Grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E3A8A"/>
+      <stop offset="100%" stop-color="#3B82F6"/>
+    </linearGradient>
+    <linearGradient id="stage3Grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D97706"/>
+      <stop offset="100%" stop-color="#F59E0B"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Title Banner -->
+  <text x="800" y="65" text-anchor="middle" font-size="32" font-weight="800" fill="#0B2545" letter-spacing="1">MPLAD-TRACE 360 SOLUTION ECOSYSTEM</text>
+  <text x="800" y="98" text-anchor="middle" font-size="16" font-weight="500" fill="#64748B">AI-Powered Continuous Surveillance, Spatial Verification &amp; Multi-Stakeholder Transparency</text>
+
+  <!-- Stage 1: Input Sources -->
+  <g transform="translate(80, 130)">
+    <rect width="420" height="700" rx="24" fill="#ffffff" stroke="#e2e8f0" stroke-width="2" filter="url(#shadow)"/>
+    <rect width="420" height="60" rx="24" fill="url(#stage1Grad)"/>
+    <rect y="30" width="420" height="30" fill="url(#stage1Grad)"/>
+    <text x="210" y="38" text-anchor="middle" font-size="20" font-weight="700" fill="#ffffff" letter-spacing="0.5">1. DATA INGESTION FEEDS</text>
+
+    <!-- Card 1.1 -->
+    <g transform="translate(25, 90)">
+      <rect width="370" height="165" rx="16" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
+      <circle cx="45" cy="45" r="24" fill="#10b981"/>
+      <text x="45" y="52" text-anchor="middle" font-size="20" fill="#ffffff">GOV</text>
+      <text x="85" y="42" font-size="18" font-weight="700" fill="#065f46">MoSPI e-SAKSHI Portal</text>
+      <text x="85" y="65" font-size="13" font-weight="600" fill="#047857">Project Sanction Lifecycle</text>
+      <text x="25" y="105" font-size="13" fill="#334155">• MP Recommendations &amp; Quotas</text>
+      <text x="25" y="128" font-size="13" fill="#334155">• Technical &amp; Admin Sanctions</text>
+      <text x="25" y="150" font-size="13" fill="#334155">• Work Orders &amp; Agency Mapping</text>
+    </g>
+
+    <!-- Card 1.2 -->
+    <g transform="translate(25, 280)">
+      <rect width="370" height="165" rx="16" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/>
+      <circle cx="45" cy="45" r="24" fill="#0284c7"/>
+      <text x="45" y="52" text-anchor="middle" font-size="16" font-weight="bold" fill="#ffffff">PFMS</text>
+      <text x="85" y="42" font-size="18" font-weight="700" fill="#0c4a6e">PFMS &amp; Treasury DBT</text>
+      <text x="85" y="65" font-size="13" font-weight="600" fill="#0369a1">Public Financial Management</text>
+      <text x="25" y="105" font-size="13" fill="#334155">• Central Tranche Releases (Rs 5 Cr/Yr)</text>
+      <text x="25" y="128" font-size="13" fill="#334155">• District Treasury to Agency Inflows</text>
+      <text x="25" y="150" font-size="13" fill="#334155">• Contractor Milestone Billing Logs</text>
+    </g>
+
+    <!-- Card 1.3 -->
+    <g transform="translate(25, 470)">
+      <rect width="370" height="185" rx="16" fill="#fefce8" stroke="#fef08a" stroke-width="1.5"/>
+      <circle cx="45" cy="45" r="24" fill="#eab308"/>
+      <text x="45" y="52" text-anchor="middle" font-size="16" font-weight="bold" fill="#ffffff">GPS</text>
+      <text x="85" y="42" font-size="18" font-weight="700" fill="#854d0e">Mobile Geotagged App</text>
+      <text x="85" y="65" font-size="13" font-weight="600" fill="#a16207">Ground-Truth Field Verification</text>
+      <text x="25" y="105" font-size="13" fill="#334155">• Dual-Band GPS &amp; Timestamp Lock</text>
+      <text x="25" y="128" font-size="13" fill="#334155">• Site Progress Photos (Foundation, Finish)</text>
+      <text x="25" y="150" font-size="13" fill="#334155">• Offline-First PWA for Remote Sites</text>
+      <text x="25" y="172" font-size="13" fill="#334155">• Citizen Grievance &amp; Whistleblower</text>
+    </g>
+  </g>
+
+  <!-- Connectors 1 to 2 -->
+  <path d="M 500 480 L 590 480" stroke="#3b82f6" stroke-width="4" stroke-dasharray="8 6" fill="none"/>
+  <polygon points="590,474 605,480 590,486" fill="#3b82f6"/>
+
+  <!-- Stage 2: AI Core -->
+  <g transform="translate(610, 130)">
+    <rect width="380" height="700" rx="24" fill="#ffffff" stroke="#bfdbfe" stroke-width="2.5" filter="url(#shadow)"/>
+    <rect width="380" height="60" rx="24" fill="url(#stage2Grad)"/>
+    <rect y="30" width="380" height="30" fill="url(#stage2Grad)"/>
+    <text x="190" y="38" text-anchor="middle" font-size="20" font-weight="700" fill="#ffffff" letter-spacing="0.5">2. AI INTELLIGENCE CORE</text>
+
+    <!-- AI Module 1 -->
+    <g transform="translate(20, 90)">
+      <rect width="340" height="175" rx="16" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>
+      <circle cx="40" cy="40" r="22" fill="#2563eb"/>
+      <text x="40" y="47" text-anchor="middle" font-size="15" font-weight="bold" fill="#ffffff">AI 1</text>
+      <text x="75" y="36" font-size="17" font-weight="700" fill="#1e40af">7-Factor Risk Engine</text>
+      <text x="75" y="56" font-size="12" font-weight="600" fill="#3b82f6">Continuous Audit Score (0-100)</text>
+      <text x="20" y="92" font-size="12.5" fill="#334155">• Evaluates Financial vs. Physical Gap</text>
+      <text x="20" y="114" font-size="12.5" fill="#334155">• Flags Stalled Works &amp; Delay Trends</text>
+      <text x="20" y="136" font-size="12.5" fill="#334155">• Measurement Book &amp; Grievance Signals</text>
+      <text x="20" y="158" font-size="12" font-weight="700" fill="#1d4ed8">Output: Normal | Watch | High Risk | Critical</text>
+    </g>
+
+    <!-- AI Module 2 -->
+    <g transform="translate(20, 290)">
+      <rect width="340" height="175" rx="16" fill="#fdf4ff" stroke="#f0abfc" stroke-width="1.5"/>
+      <circle cx="40" cy="40" r="22" fill="#c026d3"/>
+      <text x="40" y="47" text-anchor="middle" font-size="15" font-weight="bold" fill="#ffffff">AI 2</text>
+      <text x="75" y="36" font-size="17" font-weight="700" fill="#86198f">Spatial Duplicate Detector</text>
+      <text x="75" y="56" font-size="12" font-weight="600" fill="#a21caf">Haversine + Lexical Overlap</text>
+      <text x="20" y="92" font-size="12.5" fill="#334155">• Geodesic Distance Check within 250m</text>
+      <text x="20" y="114" font-size="12.5" fill="#334155">• Jaccard Token Match on Descriptions</text>
+      <text x="20" y="136" font-size="12.5" fill="#334155">• Prevents Double-Dipping Across Schemes</text>
+      <text x="20" y="158" font-size="12" font-weight="700" fill="#a21caf">Action: Auto-holds Next Financial Tranche</text>
+    </g>
+
+    <!-- AI Module 3 -->
+    <g transform="translate(20, 490)">
+      <rect width="340" height="175" rx="16" fill="#f0fdfa" stroke="#99f6e4" stroke-width="1.5"/>
+      <circle cx="40" cy="40" r="22" fill="#0d9488"/>
+      <text x="40" y="47" text-anchor="middle" font-size="15" font-weight="bold" fill="#ffffff">AI 3</text>
+      <text x="75" y="36" font-size="17" font-weight="700" fill="#115e59">Bayesian Delay Forecaster</text>
+      <text x="75" y="56" font-size="12" font-weight="600" fill="#0f766e">Predictive Schedule Intelligence</text>
+      <text x="20" y="92" font-size="12.5" fill="#334155">• Dynamic Velocity: Progress % / Elapsed Days</text>
+      <text x="20" y="114" font-size="12.5" fill="#334155">• Contractor Speed &amp; Weather Factors</text>
+      <text x="20" y="136" font-size="12.5" fill="#334155">• Computes Projected Slippage Days</text>
+      <text x="20" y="158" font-size="12" font-weight="700" fill="#0f766e">Advisory: Alerts Issued 60 Days in Advance</text>
+    </g>
+  </g>
+
+  <!-- Connectors 2 to 3 -->
+  <path d="M 990 480 L 1080 480" stroke="#f59e0b" stroke-width="4" stroke-dasharray="8 6" fill="none"/>
+  <polygon points="1080,474 1095,480 1080,486" fill="#f59e0b"/>
+
+  <!-- Stage 3: Dashboards -->
+  <g transform="translate(1100, 130)">
+    <rect width="420" height="700" rx="24" fill="#ffffff" stroke="#e2e8f0" stroke-width="2" filter="url(#shadow)"/>
+    <rect width="420" height="60" rx="24" fill="url(#stage3Grad)"/>
+    <rect y="30" width="420" height="30" fill="url(#stage3Grad)"/>
+    <text x="210" y="38" text-anchor="middle" font-size="20" font-weight="700" fill="#ffffff" letter-spacing="0.5">3. MULTI-STAKEHOLDER ROLES</text>
+
+    <!-- Role 1 -->
+    <g transform="translate(25, 80)">
+      <rect width="370" height="135" rx="14" fill="#fffbeb" stroke="#fde68a" stroke-width="1.5"/>
+      <text x="20" y="32" font-size="16" font-weight="700" fill="#92400e">Role 1: Citizen / Ward Committee</text>
+      <text x="20" y="60" font-size="12.5" fill="#334155">• Public Works Explorer &amp; Interactive GIS Map</text>
+      <text x="20" y="82" font-size="12.5" fill="#334155">• Transparent 360 Fund Flow &amp; Site Photos</text>
+      <text x="20" y="104" font-size="12.5" fill="#334155">• Whistleblower Grievances with Direct Tracking</text>
+    </g>
+
+    <!-- Role 2 -->
+    <g transform="translate(25, 230)">
+      <rect width="370" height="135" rx="14" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/>
+      <text x="20" y="32" font-size="16" font-weight="700" fill="#1e293b">Role 2: Field Officer (AEE / PWD)</text>
+      <text x="20" y="60" font-size="12.5" fill="#334155">• Mobile Geotagged Field Inspection Console</text>
+      <text x="20" y="82" font-size="12.5" fill="#334155">• GPS Geofence Match (Variance Check)</text>
+      <text x="20" y="104" font-size="12.5" fill="#334155">• Milestone Progress Slider &amp; Photo Cert</text>
+    </g>
+
+    <!-- Role 3 -->
+    <g transform="translate(25, 380)">
+      <rect width="370" height="135" rx="14" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+      <text x="20" y="32" font-size="16" font-weight="700" fill="#1e40af">Role 3: District Collector (IAS)</text>
+      <text x="20" y="60" font-size="12.5" fill="#334155">• AI Risk Center &amp; Spatial Duplicate Triage</text>
+      <text x="20" y="82" font-size="12.5" fill="#334155">• 4-Tier Action: Assign, Escalate, or Resolve</text>
+      <text x="20" y="104" font-size="12.5" fill="#334155">• Guarantee Expiry Countdown &amp; Contractor Rating</text>
+    </g>
+
+    <!-- Role 4 -->
+    <g transform="translate(25, 530)">
+      <rect width="370" height="145" rx="14" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
+      <text x="20" y="32" font-size="16" font-weight="700" fill="#166534">Role 4: Central Ministry (MoSPI)</text>
+      <text x="20" y="60" font-size="12.5" fill="#334155">• Nationwide Macro Analytics (Release vs Spent)</text>
+      <text x="20" y="82" font-size="12.5" fill="#334155">• Cross-State Anomaly Clustering &amp; Ingestion</text>
+      <text x="20" y="104" font-size="12.5" fill="#334155">• Cryptographic Immutable Audit Trail</text>
+    </g>
+  </g>
+</svg>

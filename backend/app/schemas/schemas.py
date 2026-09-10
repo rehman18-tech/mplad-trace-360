@@ -180,11 +180,16 @@ class ProjectSummarySchema(BaseModel):
     sanctioned_amount: float
     contract_amount: float
     actual_expenditure: float
+    funds_released: Optional[float] = None
+    funds_paid: Optional[float] = None
+    start_date: Optional[str] = None
+    expected_completion_date: Optional[str] = None
     physical_progress: float
     financial_progress: float
     delay_days: int
     overall_risk_score: int
     risk_level: str
+    contractor_id: Optional[str] = None
     contractor_name: Optional[str] = None
     last_inspected_date: Optional[str] = None
     latitude: float

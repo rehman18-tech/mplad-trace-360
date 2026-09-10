@@ -1,0 +1,162 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="100%" height="100%" style="background:#f8fafc; font-family:'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <filter id="cardShadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#0f172a" flood-opacity="0.06"/>
+    </filter>
+    <linearGradient id="l4Grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4f46e5"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+    <linearGradient id="l3Grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#0ea5e9"/>
+    </linearGradient>
+    <linearGradient id="l2Grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+    <linearGradient id="l1Grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#334155"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Header -->
+  <text x="800" y="60" text-anchor="middle" font-size="32" font-weight="800" fill="#0B2545" letter-spacing="1">PROJECT TECHNICAL ARCHITECTURE</text>
+  <text x="800" y="92" text-anchor="middle" font-size="16" font-weight="500" fill="#64748B">Modular 4-Layer High Performance Full-Stack Governance Architecture</text>
+
+  <!-- Layer 4: Presentation Layer -->
+  <g transform="translate(100, 120)">
+    <rect width="1400" height="150" rx="20" fill="#ffffff" stroke="#e0e7ff" stroke-width="2" filter="url(#cardShadow)"/>
+    <rect width="280" height="150" rx="20" fill="url(#l4Grad)"/>
+    <rect x="250" width="30" height="150" fill="url(#l4Grad)"/>
+    <text x="140" y="65" text-anchor="middle" font-size="20" font-weight="800" fill="#ffffff">LAYER 4</text>
+    <text x="140" y="92" text-anchor="middle" font-size="14" font-weight="600" fill="#e0e7ff">MODERN PRESENTATION</text>
+    <text x="140" y="112" text-anchor="middle" font-size="12" fill="#c7d2fe">Client-Side SPA</text>
+
+    <!-- Component Cards L4 -->
+    <g transform="translate(310, 20)">
+      <rect width="240" height="110" rx="14" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1.5"/>
+      <text x="120" y="42" text-anchor="middle" font-size="17" font-weight="700" fill="#5b21b6">React 18 (SPA)</text>
+      <text x="120" y="68" text-anchor="middle" font-size="12.5" fill="#4c1d95">Vite 5 Bundler &amp; HMR</text>
+      <text x="120" y="88" text-anchor="middle" font-size="12" fill="#6b21a8">Modular Component Tree</text>
+    </g>
+    <g transform="translate(580, 20)">
+      <rect width="240" height="110" rx="14" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1.5"/>
+      <text x="120" y="42" text-anchor="middle" font-size="17" font-weight="700" fill="#5b21b6">TypeScript 5.2</text>
+      <text x="120" y="68" text-anchor="middle" font-size="12.5" fill="#4c1d95">Strict Entity Typing</text>
+      <text x="120" y="88" text-anchor="middle" font-size="12" fill="#6b21a8">Zero Runtime Type Errors</text>
+    </g>
+    <g transform="translate(850, 20)">
+      <rect width="240" height="110" rx="14" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1.5"/>
+      <text x="120" y="42" text-anchor="middle" font-size="17" font-weight="700" fill="#5b21b6">Tailwind CSS 3</text>
+      <text x="120" y="68" text-anchor="middle" font-size="12.5" fill="#4c1d95">Govt Design System</text>
+      <text x="120" y="88" text-anchor="middle" font-size="12" fill="#6b21a8">Ashoka Navy &amp; Saffron UI</text>
+    </g>
+    <g transform="translate(1120, 20)">
+      <rect width="250" height="110" rx="14" fill="#f5f3ff" stroke="#ddd6fe" stroke-width="1.5"/>
+      <text x="125" y="42" text-anchor="middle" font-size="17" font-weight="700" fill="#5b21b6">Leaflet + OSM GIS</text>
+      <text x="125" y="68" text-anchor="middle" font-size="12.5" fill="#4c1d95">Zero-Cost Vector Maps</text>
+      <text x="125" y="88" text-anchor="middle" font-size="12" fill="#6b21a8">Colored Risk Pins &amp; Bounds</text>
+    </g>
+  </g>
+
+  <!-- Connectors L4 to L3 -->
+  <path d="M 800 270 L 800 300" stroke="#6366f1" stroke-width="3" stroke-dasharray="6 4"/>
+
+  <!-- Layer 3: REST API Layer -->
+  <g transform="translate(100, 300)">
+    <rect width="1400" height="150" rx="20" fill="#ffffff" stroke="#e0f2fe" stroke-width="2" filter="url(#cardShadow)"/>
+    <rect width="280" height="150" rx="20" fill="url(#l3Grad)"/>
+    <rect x="250" width="30" height="150" fill="url(#l3Grad)"/>
+    <text x="140" y="65" text-anchor="middle" font-size="20" font-weight="800" fill="#ffffff">LAYER 3</text>
+    <text x="140" y="92" text-anchor="middle" font-size="14" font-weight="600" fill="#e0f2fe">REST API &amp; SERVICE</text>
+    <text x="140" y="112" text-anchor="middle" font-size="12" fill="#bae6fd">FastAPI &amp; Async I/O</text>
+
+    <!-- Component Cards L3 -->
+    <g transform="translate(310, 20)">
+      <rect width="330" height="110" rx="14" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1.5"/>
+      <text x="165" y="42" text-anchor="middle" font-size="17" font-weight="700" fill="#0369a1">FastAPI REST Endpoints</text>
+      <text x="165" y="68" text-anchor="middle" font-size="12.5" fill="#0284c7">/api/projects | /api/contractors</text>
+      <text x="165" y="88" text-anchor="middle" font-size="12" fill="#0369a1">/api/alerts | /api/inspections</text>
+    </g>
+    <g transform="translate(670, 20)">
+      <rect width="330" height="110" rx="14" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1.5"/>
+      <text x="165" y="42" text-anchor="middle" font-size="17" font-weight="700" fill="#0369a1">Swagger OpenAPI 3.1</text>
+      <text x="165" y="68" text-anchor="middle" font-size="12.5" fill="#0284c7">Interactive Browser Testing</text>
+      <text x="165" y="88" text-anchor="middle" font-size="12" fill="#0369a1">Self-Updating Living Docs</text>
+    </g>
+    <g transform="translate(1030, 20)">
+      <rect width="340" height="110" rx="14" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1.5"/>
+      <text x="170" y="42" text-anchor="middle" font-size="17" font-weight="700" fill="#0369a1">Pydantic V2 &amp; Security</text>
+      <text x="170" y="68" text-anchor="middle" font-size="12.5" fill="#0284c7">Strict Request Validation</text>
+      <text x="170" y="88" text-anchor="middle" font-size="12" fill="#0369a1">JWT RBAC Role Isolation</text>
+    </g>
+  </g>
+
+  <!-- Connectors L3 to L2 -->
+  <path d="M 800 450 L 800 480" stroke="#0284c7" stroke-width="3" stroke-dasharray="6 4"/>
+
+  <!-- Layer 2: Core Processing & AI Layer -->
+  <g transform="translate(100, 480)">
+    <rect width="1400" height="150" rx="20" fill="#ffffff" stroke="#dcfce7" stroke-width="2" filter="url(#cardShadow)"/>
+    <rect width="280" height="150" rx="20" fill="url(#l2Grad)"/>
+    <rect x="250" width="30" height="150" fill="url(#l2Grad)"/>
+    <text x="140" y="65" text-anchor="middle" font-size="20" font-weight="800" fill="#ffffff">LAYER 2</text>
+    <text x="140" y="92" text-anchor="middle" font-size="14" font-weight="600" fill="#dcfce7">AI INTELLIGENCE CORE</text>
+    <text x="140" y="112" text-anchor="middle" font-size="12" fill="#bbf7d0">Custom Python Modules</text>
+
+    <!-- Component Cards L2 -->
+    <g transform="translate(310, 20)">
+      <rect width="330" height="110" rx="14" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
+      <text x="165" y="42" text-anchor="middle" font-size="17" font-weight="700" fill="#15803d">7-Factor Risk Engine</text>
+      <text x="165" y="68" text-anchor="middle" font-size="12.5" fill="#166534">Financial vs Physical Burn Lag</text>
+      <text x="165" y="88" text-anchor="middle" font-size="12" fill="#15803d">Continuous 0-100 Health Score</text>
+    </g>
+    <g transform="translate(670, 20)">
+      <rect width="330" height="110" rx="14" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
+      <text x="165" y="42" text-anchor="middle" font-size="17" font-weight="700" fill="#15803d">Spatial Haversine Model</text>
+      <text x="165" y="68" text-anchor="middle" font-size="12.5" fill="#166534">Geodesic Curvature Distance</text>
+      <text x="165" y="88" text-anchor="middle" font-size="12" fill="#15803d">&lt; 250m Overlap &amp; Token Match</text>
+    </g>
+    <g transform="translate(1030, 20)">
+      <rect width="340" height="110" rx="14" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
+      <text x="170" y="42" text-anchor="middle" font-size="17" font-weight="700" fill="#15803d">Bayesian Delay Forecaster</text>
+      <text x="170" y="68" text-anchor="middle" font-size="12.5" fill="#166534">Dynamic Daily Progress Rate</text>
+      <text x="170" y="88" text-anchor="middle" font-size="12" fill="#15803d">Forecasts Bottlenecks Months Early</text>
+    </g>
+  </g>
+
+  <!-- Connectors L2 to L1 -->
+  <path d="M 800 630 L 800 660" stroke="#10b981" stroke-width="3" stroke-dasharray="6 4"/>
+
+  <!-- Layer 1: Data & Persistence Layer -->
+  <g transform="translate(100, 660)">
+    <rect width="1400" height="150" rx="20" fill="#ffffff" stroke="#e2e8f0" stroke-width="2" filter="url(#cardShadow)"/>
+    <rect width="280" height="150" rx="20" fill="url(#l1Grad)"/>
+    <rect x="250" width="30" height="150" fill="url(#l1Grad)"/>
+    <text x="140" y="65" text-anchor="middle" font-size="20" font-weight="800" fill="#ffffff">LAYER 1</text>
+    <text x="140" y="92" text-anchor="middle" font-size="14" font-weight="600" fill="#cbd5e1">DATA &amp; PERSISTENCE</text>
+    <text x="140" y="112" text-anchor="middle" font-size="12" fill="#94a3b8">Storage &amp; Adapters</text>
+
+    <!-- Component Cards L1 -->
+    <g transform="translate(310, 20)">
+      <rect width="330" height="110" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+      <text x="165" y="42" text-anchor="middle" font-size="17" font-weight="700" fill="#334155">SQLAlchemy 2.0 ORM</text>
+      <text x="165" y="68" text-anchor="middle" font-size="12.5" fill="#475569">SQLite (Zero-Config Embedded)</text>
+      <text x="165" y="88" text-anchor="middle" font-size="12" fill="#64748b">PostgreSQL / PostGIS Ready</text>
+    </g>
+    <g transform="translate(670, 20)">
+      <rect width="330" height="110" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+      <text x="165" y="42" text-anchor="middle" font-size="17" font-weight="700" fill="#334155">Geotagged Photo Store</text>
+      <text x="165" y="68" text-anchor="middle" font-size="12.5" fill="#475569">EXIF Coordinates &amp; Timestamp</text>
+      <text x="165" y="88" text-anchor="middle" font-size="12" fill="#64748b">Before/After Milestone Pairs</text>
+    </g>
+    <g transform="translate(1030, 20)">
+      <rect width="340" height="110" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+      <text x="170" y="42" text-anchor="middle" font-size="17" font-weight="700" fill="#334155">Government Adapters</text>
+      <text x="170" y="68" text-anchor="middle" font-size="12.5" fill="#475569">MoSPI e-SAKSHI ETL Adapter</text>
+      <text x="170" y="88" text-anchor="middle" font-size="12" fill="#64748b">PFMS Treasury &amp; GeM Portals</text>
+    </g>
+  </g>
+</svg>

@@ -100,21 +100,38 @@ export const AlertsEscalationPage: React.FC<AlertsEscalationPageProps> = ({ onOp
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Alerts List */}
         <div className="space-y-3">
-          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Surveillance Alerts</h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Surveillance Alerts</h3>
+            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+              {alerts.length} Total
+            </span>
+          </div>
+
           {alerts.map((al) => {
             const isSelected = selectedAlert?.id === al.id;
+            const isCitizenDefect = al.id.startsWith('ALT-DEFECT') || al.category === 'Guarantee Alert' || al.title.includes('Statutory Defect Notice');
+
             return (
               <div
                 key={al.id}
                 onClick={() => setSelectedAlert(al)}
                 className={`p-4 rounded-xl border cursor-pointer transition-all ${
                   isSelected
-                    ? 'border-gov-navy bg-slate-50 shadow-sm'
+                    ? 'border-gov-navy bg-slate-50 shadow-sm ring-2 ring-gov-navy/20'
+                    : isCitizenDefect
+                    ? 'border-rose-300 bg-rose-50/40 hover:bg-rose-50'
                     : 'border-slate-200 bg-white hover:bg-slate-50'
                 }`}
               >
                 <div className="flex items-center justify-between text-xs mb-1">
-                  <span className="font-mono font-bold text-slate-500">{al.id}</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-mono font-bold text-slate-500">{al.id}</span>
+                    {isCitizenDefect && (
+                      <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded bg-rose-600 text-white animate-pulse">
+                        CITIZEN DLP
+                      </span>
+                    )}
+                  </div>
                   <RiskBadge level={al.severity} size="sm" />
                 </div>
                 <h4 className="font-bold text-gov-navy text-xs mt-1 truncate">{al.title}</h4>

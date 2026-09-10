@@ -13,7 +13,10 @@ interface StatCardProps {
   inr?: boolean;
 }
 
-export function formatIndianCurrency(amount: number): string {
+export function formatIndianCurrency(amount?: number | null): string {
+  if (typeof amount !== 'number' || isNaN(amount) || amount === null || amount === undefined) {
+    return '₹0';
+  }
   if (amount >= 10000000) {
     return `₹${(amount / 10000000).toFixed(2)} Cr`;
   }
