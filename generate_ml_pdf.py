@@ -202,6 +202,11 @@ def build_pdf(filename="MPLAD_ML_Models_and_System_Compendium.pdf"):
             Paragraph("<b>6. NLP Grievance Classifier</b><br/>(Citizen Intelligence)", cell_style),
             Paragraph("TF-IDF Vectorization + Multinomial Naive Bayes / Transformer Routing", cell_style),
             Paragraph("Automatically classifies citizen complaints (e.g. Substandard Quality, Abandonment, Bribery) and dispatches alerts directly to the designated Assistant Engineer.", cell_style)
+        ],
+        [
+            Paragraph("<b>7. GPS Reverse-Lookup & Defect Liability Invoker</b><br/>(Contractor Guarantee Hold)", cell_style),
+            Paragraph("Spherical Geodesy (Haversine) + Multi-Attribute Disambiguation + PBG Escrow Hold", cell_style),
+            Paragraph("Takes single camera click with live GPS, isolates nearest asset/contractor via spatial geofencing, verifies 36-month DLP warranty, freezes 5% Performance Bank Guarantee, and alerts District Collector.", cell_style)
         ]
     ]
     t_ml = Table(ml_table, colWidths=[110, 160, 253])
@@ -236,11 +241,11 @@ def build_pdf(filename="MPLAD_ML_Models_and_System_Compendium.pdf"):
         p_style
     ))
 
-    story.append(Paragraph("C. Geospatial Haversine & Jaccard Duplicate Detection", h2_style))
+    story.append(Paragraph("D. 1-Click GPS Defect Liability & Contractor Guarantee Hold Engine", h2_style))
     story.append(Paragraph(
-        "• <b>Spherical Haversine Law:</b> Computes the great-circle surface distance between two latitude/longitude pairs.<br/>"
-        "• <b>Text Alignment:</b> Computes Jaccard word-level similarity <i>J(A,B) = |A ∩ B| / |A ∪ B|</i> across sanctioned work descriptions.<br/>"
-        "• <b>Duplicate Score:</b> If distance &le; 150m and text similarity &ge; 40%, the combined overlap score flags <i>'Potential Duplicate Infrastructure Allocation'</i> to prevent contractors billing the same drain or school under both MPLADS and State PWD funds.",
+        "• <b>Real-Time Spherical Inversion:</b> When a citizen snaps a site defect photo, the system extracts the device hardware GPS coordinate <i>(Lat_c, Lon_c)</i> and queries all public works within radius <i>R</i> using the Haversine equation: <i>d = 2R &middot; arcsin(&radic;(sin&sup2;(&Delta;lat/2) + cos(lat1)cos(lat2)sin&sup2;(&Delta;lon/2)))</i>.<br/>"
+        "• <b>Multi-Project Disambiguation Score (S):</b> If multiple contractors worked at the same junction (e.g. road contractor + drain contractor), candidates are scored via: <i>S = 0.50 &middot; (1 - d/d_max) + 0.35 &middot; Active_DLP_Flag + 0.15 &middot; Cosine_Sim(Category, Claimed_Issue)</i>.<br/>"
+        "• <b>Statutory Defect Liability & Bank Guarantee Freeze:</b> Under CPWD Works Manual 2024 & MoSPI Clause 4.2 (36-month Defect Liability Period), the system automatically locks the contractor's 5% Performance Bank Guarantee (PBG) in escrow and escalates a Level-4 CRITICAL Alert directly to the District Collector and Chief Vigilance Officer.",
         p_style
     ))
 
