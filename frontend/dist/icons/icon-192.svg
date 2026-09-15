@@ -1,54 +1,59 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
   <defs>
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0B2545" />
-      <stop offset="100%" stop-color="#134074" />
+    <!-- Background Gradient: Deep Royal Indigo to Midnight Navy -->
+    <linearGradient id="pwaBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F2B48" />
+      <stop offset="50%" stop-color="#0A1D33" />
+      <stop offset="100%" stop-color="#05101D" />
     </linearGradient>
-    <linearGradient id="flagGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#FF9933" />
-      <stop offset="50%" stop-color="#FFFFFF" />
-      <stop offset="100%" stop-color="#138808" />
+
+    <!-- Golden Saffron Glow Gradient -->
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FBBF24" />
+      <stop offset="100%" stop-color="#EA580C" />
     </linearGradient>
+
+    <!-- Cyan Satellite Glow -->
+    <linearGradient id="radarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="100%" stop-color="#0284C7" />
+    </linearGradient>
+
+    <!-- Subtle Shadow -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.4" />
+    </filter>
   </defs>
 
-  <!-- Background rounded rect -->
-  <rect width="192" height="192" rx="42" fill="url(#bgGrad)" />
+  <!-- Full Background (Safe for Maskable Crop) -->
+  <rect width="192" height="192" fill="url(#pwaBg)" />
 
-  <!-- Tricolor Accent Ribbon -->
-  <rect x="24" y="22" width="144" height="6" rx="3" fill="url(#flagGrad)" />
+  <!-- Center Artwork - Strictly Inside 65% Safe-Zone to Prevent Android Mask Cut-Off -->
+  <g transform="translate(96, 96)" filter="url(#glow)">
+    
+    <!-- Outer 360 Radar Orbit Rings -->
+    <circle cx="0" cy="0" r="48" fill="none" stroke="#38BDF8" stroke-width="1.8" stroke-dasharray="8 6" opacity="0.45" />
+    <circle cx="0" cy="0" r="40" fill="#0D2744" stroke="url(#goldGrad)" stroke-width="2.5" />
 
-  <!-- Outer Ring -->
-  <circle cx="96" cy="100" r="48" stroke="#EE9B00" stroke-width="3" fill="none" opacity="0.3" />
+    <!-- Stylized Civic Public Infrastructure Monument (Pillars & Dome) -->
+    <!-- Dome / Pediment -->
+    <path d="M -22 -6 L 0 -22 L 22 -6 Z" fill="url(#goldGrad)" />
+    
+    <!-- Arch beam -->
+    <rect x="-22" y="-4" width="44" height="3" rx="1" fill="#FFFFFF" />
 
-  <!-- Ashoka Chakra -->
-  <circle cx="96" cy="100" r="38" stroke="#00D2D3" stroke-width="2.5" fill="#0B2545" />
-  <circle cx="96" cy="100" r="9" fill="#0B2545" stroke="#00D2D3" stroke-width="2" />
-  <circle cx="96" cy="100" r="3.5" fill="#FF9933" />
+    <!-- 4 Civic Pillars (Public Works) -->
+    <rect x="-19" y="1" width="5.5" height="20" rx="1.5" fill="#FFFFFF" opacity="0.95" />
+    <rect x="-8.5" y="1" width="5.5" height="20" rx="1.5" fill="#FFFFFF" opacity="0.95" />
+    <rect x="3" y="1" width="5.5" height="20" rx="1.5" fill="#FFFFFF" opacity="0.95" />
+    <rect x="13.5" y="1" width="5.5" height="20" rx="1.5" fill="#FFFFFF" opacity="0.95" />
 
-  <!-- 24 spokes -->
-  <g stroke="#00D2D3" stroke-width="1.2">
-    <line x1="96" y1="62" x2="96" y2="91" />
-    <line x1="96" y1="109" x2="96" y2="138" />
-    <line x1="58" y1="100" x2="87" y2="100" />
-    <line x1="105" y1="100" x2="134" y2="100" />
-    <line x1="69" y1="73" x2="90" y2="94" />
-    <line x1="102" y1="106" x2="123" y2="127" />
-    <line x1="69" y1="127" x2="90" y2="106" />
-    <line x1="102" y1="94" x2="123" y2="73" />
-    <line x1="78" y1="66" x2="93" y2="92" />
-    <line x1="99" y1="108" x2="114" y2="134" />
-    <line x1="62" y1="84" x2="89" y2="97" />
-    <line x1="103" y1="103" x2="130" y2="116" />
-    <line x1="62" y1="116" x2="89" y2="103" />
-    <line x1="103" y1="97" x2="130" y2="84" />
-    <line x1="78" y1="134" x2="93" y2="108" />
-    <line x1="99" y1="92" x2="114" y2="66" />
+    <!-- Base Plinth -->
+    <rect x="-24" y="22" width="48" height="4" rx="1.5" fill="#FFFFFF" />
+    <rect x="-26" y="27" width="52" height="3" rx="1.5" fill="url(#goldGrad)" />
+
+    <!-- Satellite / 360 Digital Beacon Pin (Top-Right) -->
+    <circle cx="28" cy="-28" r="9" fill="#10B981" stroke="#05101D" stroke-width="2.5" />
+    <circle cx="28" cy="-28" r="4" fill="#FFFFFF" />
   </g>
-
-  <!-- Mobile Inspection Badge / GPS Dot -->
-  <circle cx="140" cy="144" r="14" fill="#10B981" stroke="#0B2545" stroke-width="3" />
-  <path d="M135 144 L139 148 L146 140" stroke="#FFFFFF" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" />
-
-  <!-- Label -->
-  <text x="96" y="172" fill="#E2E8F0" font-family="system-ui, sans-serif" font-weight="bold" font-size="11" text-anchor="middle" letter-spacing="1">MPLAD FIELD</text>
 </svg>

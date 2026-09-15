@@ -1,6 +1,6 @@
 {
-  "name": "MPLAD-TRACE 360: Field Officer Mobile Console",
-  "short_name": "MPLAD Field",
+  "name": "MPLAD-TRACE 360: Public Works Monitoring Platform",
+  "short_name": "MPLAD 360",
   "description": "Offline-first mobile field inspection, hardware GPS geotagging, and milestone verification for MPLADS public works.",
   "start_url": "/",
   "id": "/",
