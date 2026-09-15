@@ -1,59 +1,84 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+﻿<svg xmlns=http://www.w3.org/2000/svg width=512 height=512 viewBox=0 0 512 512>
   <defs>
-    <!-- Background Gradient: Deep Royal Indigo to Midnight Navy -->
-    <linearGradient id="pwaBg512" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0F2B48" />
-      <stop offset="50%" stop-color="#0A1D33" />
-      <stop offset="100%" stop-color="#05101D" />
+    <radialGradient id=canvasBg cx=50% cy=50% r=70%>
+      <stop offset=0% stop-color=#FFFDF9 />
+      <stop offset=70% stop-color=#F9F4E8 />
+      <stop offset=100% stop-color=#F2EBD9 />
+    </radialGradient>
+    <linearGradient id=cardBg x1=0% y1=0% x2=100% y2=100%>
+      <stop offset=0% stop-color=#FFFFFF />
+      <stop offset=50% stop-color=#FFFDF6 />
+      <stop offset=100% stop-color=#FAF4E5 />
     </linearGradient>
-
-    <!-- Golden Saffron Glow Gradient -->
-    <linearGradient id="goldGrad512" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FBBF24" />
-      <stop offset="100%" stop-color="#EA580C" />
+    <linearGradient id=goldBorder x1=0% y1=0% x2=100% y2=100%>
+      <stop offset=0% stop-color=#E5C058 />
+      <stop offset=35% stop-color=#D4AF37 />
+      <stop offset=70% stop-color=#C59B27 />
+      <stop offset=100% stop-color=#E5C058 />
     </linearGradient>
-
-    <!-- Cyan Satellite Glow -->
-    <linearGradient id="radarGrad512" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#38BDF8" />
-      <stop offset="100%" stop-color="#0284C7" />
-    </linearGradient>
-
-    <!-- Subtle Shadow -->
-    <filter id="glow512" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="8" stdDeviation="14" flood-color="#000000" flood-opacity="0.45" />
+    <filter id=softShadow x=-10% y=-10% width=125% height=125%>
+      <feDropShadow dx=0 dy=10 stdDeviation=14 flood-color=#8C7355 flood-opacity=0.18 />
+      <feDropShadow dx=0 dy=4 stdDeviation=6 flood-color=#8C7355 flood-opacity=0.10 />
     </filter>
   </defs>
-
-  <!-- Full Background (Safe for Maskable Crop) -->
-  <rect width="512" height="512" fill="url(#pwaBg512)" />
-
-  <!-- Center Artwork - Strictly Inside 65% Safe-Zone to Prevent Android Mask Cut-Off -->
-  <g transform="translate(256, 256)" filter="url(#glow512)">
-    
-    <!-- Outer 360 Radar Orbit Rings -->
-    <circle cx="0" cy="0" r="130" fill="none" stroke="#38BDF8" stroke-width="4.5" stroke-dasharray="22 16" opacity="0.45" />
-    <circle cx="0" cy="0" r="108" fill="#0D2744" stroke="url(#goldGrad512)" stroke-width="6.5" />
-
-    <!-- Stylized Civic Public Infrastructure Monument (Pillars & Dome) -->
-    <!-- Dome / Pediment -->
-    <path d="M -60 -16 L 0 -58 L 60 -16 Z" fill="url(#goldGrad512)" />
-    
-    <!-- Arch beam -->
-    <rect x="-60" y="-11" width="120" height="8" rx="2.5" fill="#FFFFFF" />
-
-    <!-- 4 Civic Pillars (Public Works) -->
-    <rect x="-52" y="2" width="15" height="54" rx="3.5" fill="#FFFFFF" opacity="0.95" />
-    <rect x="-23" y="2" width="15" height="54" rx="3.5" fill="#FFFFFF" opacity="0.95" />
-    <rect x="8" y="2" width="15" height="54" rx="3.5" fill="#FFFFFF" opacity="0.95" />
-    <rect x="37" y="2" width="15" height="54" rx="3.5" fill="#FFFFFF" opacity="0.95" />
-
-    <!-- Base Plinth -->
-    <rect x="-64" y="58" width="128" height="11" rx="3.5" fill="#FFFFFF" />
-    <rect x="-70" y="71" width="140" height="8" rx="3.5" fill="url(#goldGrad512)" />
-
-    <!-- Satellite / 360 Digital Beacon Pin (Top-Right) -->
-    <circle cx="76" cy="-76" r="24" fill="#10B981" stroke="#05101D" stroke-width="6" />
-    <circle cx="76" cy="-76" r="11" fill="#FFFFFF" />
+  <rect width=512 height=512 fill=url(#canvasBg) />
+  <rect x=40 y=40 width=432 height=432 rx=96 fill=url(#cardBg) stroke=url(#goldBorder) stroke-width=5 filter=url(#softShadow) />
+  <g transform=translate(256, 256)>
+    <circle cx=0 cy=0 r=132 fill=none stroke=#0B2545 stroke-width=12 />
+    <g fill=#0B2545>
+      <circle cx=0 cy=-123 r=6 transform=rotate(7.5) />
+      <circle cx=0 cy=-123 r=6 transform=rotate(22.5) />
+      <circle cx=0 cy=-123 r=6 transform=rotate(37.5) />
+      <circle cx=0 cy=-123 r=6 transform=rotate(52.5) />
+      <circle cx=0 cy=-123 r=6 transform=rotate(67.5) />
+      <circle cx=0 cy=-123 r=6 transform=rotate(82.5) />
+      <circle cx=0 cy=-123 r=6 transform=rotate(97.5) />
+      <circle cx=0 cy=-123 r=6 transform=rotate(112.5) />
+      <circle cx=0 cy=-123 r=6 transform=rotate(127.5) />
+      <circle cx=0 cy=-123 r=6 transform=rotate(142.5) />
+      <circle cx=0 cy=-123 r=6 transform=rotate(157.5) />
+      <circle cx=0 cy=-123 r=6 transform=rotate(172.5) />
+      <circle cx=0 cy=-123 r=6 transform=rotate(187.5) />
+      <circle cx=0 cy=-123 r=6 transform=rotate(202.5) />
+      <circle cx=0 cy=-123 r=6 transform=rotate(217.5) />
+      <circle cx=0 cy=-123 r=6 transform=rotate(232.5) />
+      <circle cx=0 cy=-123 r=6 transform=rotate(247.5) />
+      <circle cx=0 cy=-123 r=6 transform=rotate(262.5) />
+      <circle cx=0 cy=-123 r=6 transform=rotate(277.5) />
+      <circle cx=0 cy=-123 r=6 transform=rotate(292.5) />
+      <circle cx=0 cy=-123 r=6 transform=rotate(307.5) />
+      <circle cx=0 cy=-123 r=6 transform=rotate(322.5) />
+      <circle cx=0 cy=-123 r=6 transform=rotate(337.5) />
+      <circle cx=0 cy=-123 r=6 transform=rotate(352.5) />
+    </g>
+    <g fill=#0B2545>
+      <polygon points=-3.2,-30 0,-126 3.2,-30 transform=rotate(0) />
+      <polygon points=-3.2,-30 0,-126 3.2,-30 transform=rotate(15) />
+      <polygon points=-3.2,-30 0,-126 3.2,-30 transform=rotate(30) />
+      <polygon points=-3.2,-30 0,-126 3.2,-30 transform=rotate(45) />
+      <polygon points=-3.2,-30 0,-126 3.2,-30 transform=rotate(60) />
+      <polygon points=-3.2,-30 0,-126 3.2,-30 transform=rotate(75) />
+      <polygon points=-3.2,-30 0,-126 3.2,-30 transform=rotate(90) />
+      <polygon points=-3.2,-30 0,-126 3.2,-30 transform=rotate(105) />
+      <polygon points=-3.2,-30 0,-126 3.2,-30 transform=rotate(120) />
+      <polygon points=-3.2,-30 0,-126 3.2,-30 transform=rotate(135) />
+      <polygon points=-3.2,-30 0,-126 3.2,-30 transform=rotate(150) />
+      <polygon points=-3.2,-30 0,-126 3.2,-30 transform=rotate(165) />
+      <polygon points=-3.2,-30 0,-126 3.2,-30 transform=rotate(180) />
+      <polygon points=-3.2,-30 0,-126 3.2,-30 transform=rotate(195) />
+      <polygon points=-3.2,-30 0,-126 3.2,-30 transform=rotate(210) />
+      <polygon points=-3.2,-30 0,-126 3.2,-30 transform=rotate(225) />
+      <polygon points=-3.2,-30 0,-126 3.2,-30 transform=rotate(240) />
+      <polygon points=-3.2,-30 0,-126 3.2,-30 transform=rotate(255) />
+      <polygon points=-3.2,-30 0,-126 3.2,-30 transform=rotate(270) />
+      <polygon points=-3.2,-30 0,-126 3.2,-30 transform=rotate(285) />
+      <polygon points=-3.2,-30 0,-126 3.2,-30 transform=rotate(300) />
+      <polygon points=-3.2,-30 0,-126 3.2,-30 transform=rotate(315) />
+      <polygon points=-3.2,-30 0,-126 3.2,-30 transform=rotate(330) />
+      <polygon points=-3.2,-30 0,-126 3.2,-30 transform=rotate(345) />
+    </g>
+    <circle cx=0 cy=0 r=32 fill=#0B2545 />
+    <circle cx=0 cy=0 r=23 fill=#EA580C />
+    <circle cx=0 cy=0 r=11 fill=#10B981 />
   </g>
 </svg>
