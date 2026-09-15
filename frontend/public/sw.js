@@ -1,10 +1,16 @@
 // MPLAD-TRACE 360 Progressive Web App Service Worker
-const CACHE_NAME = 'mplad-trace-v1.3';
+const CACHE_NAME = 'mplad-trace-v2.0';
 
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
+  '/favicon.ico',
+  '/favicon.png',
+  '/favicon-32x32.png',
+  '/apple-touch-icon.png',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png',
   '/icons/icon-192.svg',
   '/icons/icon-512.svg',
   '/images/baseline_inspection.jpg',
