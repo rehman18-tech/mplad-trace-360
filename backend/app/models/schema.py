@@ -67,6 +67,14 @@ class Project(Base):
     data_source = Column(String, default="MPLADS Official Portal (e-SAKSHI API)")
     source_verification_status = Column(String, default="VERIFIED_GOVERNMENT_RECORD")
 
+    # Statutory DPR Baseline Photo Fields (Higher Official Anchor)
+    baseline_photo_url = Column(Text, nullable=True)
+    baseline_photo_timestamp = Column(String, nullable=True)
+    baseline_photo_officer = Column(String, nullable=True)
+    baseline_photo_officer_designation = Column(String, nullable=True)
+    baseline_photo_method = Column(String, nullable=True)
+    baseline_stage = Column(String, nullable=True)
+
     # Relationships
     contractor = relationship("Contractor", back_populates="projects")
     timeline_events = relationship("TimelineEvent", back_populates="project", cascade="all, delete-orphan")

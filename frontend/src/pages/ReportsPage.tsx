@@ -101,6 +101,36 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({ onOpenProject, selecte
             </button>
           </div>
         </div>
+
+        {/* Official Statutory Documents & Master Manual Banner */}
+        <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-gov-navy flex items-center justify-center text-white shrink-0">
+              <ShieldCheck className="w-4 h-4 text-gov-saffron" />
+            </div>
+            <div>
+              <div className="text-xs font-bold text-gov-navy flex items-center gap-1.5">
+                <span>Official System & Feature Manual (MoSPI & CVC Compliant)</span>
+                <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                  7 Pages • 27 Chapters
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500">
+                Complete technical architecture, satellite GPS outbox, AI vision, and 7-factor risk scoring compendium.
+              </p>
+            </div>
+          </div>
+          <a
+            href="/MPLAD_TRACE_360_COMPLETE_SYSTEM_AND_USER_MANUAL.pdf"
+            download="MPLAD_TRACE_360_COMPLETE_SYSTEM_AND_USER_MANUAL.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-3.5 py-2 bg-gov-navy hover:bg-gov-navy-light text-white text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-xs shrink-0 cursor-pointer"
+          >
+            <Download className="w-3.5 h-3.5 text-gov-saffron" />
+            <span>Download Master Manual PDF</span>
+          </a>
+        </div>
       </div>
 
       {/* Official Printable Dossier */}

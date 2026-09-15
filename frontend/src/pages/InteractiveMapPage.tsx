@@ -91,7 +91,7 @@ export const InteractiveMapPage: React.FC<InteractiveMapPageProps> = ({
             <select
               value={selectedState}
               onChange={(e) => setSelectedState(e.target.value)}
-              className="bg-[#FAF7F0] border border-amber-200/90 rounded-xl px-3 py-1.5 text-slate-800 font-medium"
+              className="bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-slate-800 font-medium"
             >
               <option value="">All States</option>
               {['Andhra Pradesh', 'Uttar Pradesh', 'Maharashtra', 'Karnataka', 'Tamil Nadu', 'Bihar', 'Rajasthan', 'West Bengal', 'Delhi', 'Gujarat'].map(s => (
@@ -102,7 +102,7 @@ export const InteractiveMapPage: React.FC<InteractiveMapPageProps> = ({
             <select
               value={selectedRisk}
               onChange={(e) => setSelectedRisk(e.target.value)}
-              className="bg-[#FAF7F0] border border-amber-200/90 rounded-xl px-3 py-1.5 text-slate-800 font-medium"
+              className="bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-slate-800 font-medium"
             >
               <option value="">All Risk Levels</option>
               <option value="NORMAL">Normal</option>
@@ -118,8 +118,8 @@ export const InteractiveMapPage: React.FC<InteractiveMapPageProps> = ({
         </div>
 
         {/* Department Quick Filter Pills */}
-        <div className="py-3 border-b border-amber-100 flex items-center gap-2 overflow-x-auto no-scrollbar">
-          <span className="text-xs font-bold text-amber-950 whitespace-nowrap uppercase tracking-wider text-[11px] pr-1">
+        <div className="py-3 border-b border-slate-200 flex items-center gap-2 overflow-x-auto no-scrollbar">
+          <span className="text-xs font-bold text-slate-600 whitespace-nowrap uppercase tracking-wider text-[11px] pr-1">
             Department:
           </span>
           {DEPT_PILLS.map((dept) => {
@@ -135,12 +135,12 @@ export const InteractiveMapPage: React.FC<InteractiveMapPageProps> = ({
                 className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap flex items-center gap-1.5 transition-all ${
                   isSelected
                     ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-xs ring-2 ring-orange-400'
-                    : 'bg-[#FCFAF7] text-slate-700 hover:bg-amber-50 hover:text-amber-950 border border-amber-200/80'
+                    : 'bg-white text-slate-700 hover:bg-slate-100 hover:text-slate-900 border border-slate-200'
                 }`}
               >
                 <Icon className={`w-3.5 h-3.5 ${isSelected ? 'text-white' : 'text-slate-500'}`} />
                 <span>{dept.label}</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isSelected ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-900 font-bold'}`}>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700 font-bold'}`}>
                   {count}
                 </span>
               </button>

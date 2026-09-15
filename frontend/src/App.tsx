@@ -22,9 +22,41 @@ import { ReportsPage } from './pages/ReportsPage';
 import { AuditLogsPage } from './pages/AuditLogsPage';
 import { AdminDataPage } from './pages/AdminDataPage';
 import { DepartmentsPage } from './pages/DepartmentsPage';
+import { ContractorPortalPage } from './pages/ContractorPortalPage';
+import { UserRole } from './types';
+
+const ROLE_ALLOWED_PAGES: Record<UserRole, string[]> = {
+  CITIZEN: ['landing', 'departments', 'projects', 'detail', 'map', 'funds', 'complaints'],
+  FIELD_OFFICER: ['landing', 'projects', 'detail', 'map', 'inspection', 'reports'],
+  CONTRACTOR: ['tenders', 'projects', 'detail', 'guarantees'],
+  DISTRICT_AUTHORITY: [
+    'landing', 'departments', 'projects', 'detail', 'map', 'tenders', 'funds', 
+    'contracts', 'contractors', 'ai-risk', 'disputes', 'guarantees', 'inspection', 
+    'complaints', 'alerts', 'reports', 'audit'
+  ],
+  VIGILANCE_AUDITOR: [
+    'landing', 'departments', 'projects', 'detail', 'map', 'tenders', 'funds', 
+    'contracts', 'contractors', 'ai-risk', 'disputes', 'guarantees', 'inspection', 
+    'complaints', 'alerts', 'reports', 'audit'
+  ],
+  ADMIN: [
+    'landing', 'departments', 'projects', 'detail', 'map', 'tenders', 'funds', 
+    'contracts', 'contractors', 'ai-risk', 'disputes', 'guarantees', 'inspection', 
+    'complaints', 'alerts', 'reports', 'audit', 'admin'
+  ],
+};
+
+const getRoleDefaultPage = (r: UserRole): string => {
+  switch (r) {
+    case 'CONTRACTOR': return 'tenders';
+    case 'FIELD_OFFICER': return 'inspection';
+    default: return 'landing';
+  }
+};
 
 const AppContent: React.FC = () => {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
+  const { role, isCitizen } = useAuth();
 
   // Parse initial route from URL Hash / Search params (e.g. #/projects, #/detail?id=MPLAD-AP-2026-00125)
   const parseRouteFromUrl = (): { page: string; projectId: string } => {
@@ -50,8 +82,14 @@ const AppContent: React.FC = () => {
   const initialRoute = parseRouteFromUrl();
   const [currentPage, setCurrentPage] = useState<string>(initialRoute.page);
   const [activeProjectId, setActiveProjectId] = useState<string>(initialRoute.projectId);
+  const [activeContractorId, setActiveContractorId] = useState<string>('CON-AP-042');
   const [globalSearch, setGlobalSearch] = useState<string>('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const handleSelectContractor = (contractorId: string) => {
+    setActiveContractorId(contractorId);
+    navigateTo('contractors');
+  };
 
   // Sync state changes to browser window.history (pushState)
   const navigateTo = (page: string, projId?: string, replace = false) => {
@@ -170,7 +208,24 @@ const AppContent: React.FC = () => {
     navigateTo('reports', id);
   };
 
+  // Role-based route guard: if active page is unauthorized for active role, redirect to default landing page
+  React.useEffect(() => {
+    const allowed = ROLE_ALLOWED_PAGES[role] || [];
+    if (!allowed.includes(currentPage)) {
+      const defaultPage = getRoleDefaultPage(role);
+      navigateTo(defaultPage, undefined, true);
+    }
+  }, [role, currentPage]);
+
   const renderPage = () => {
+    const allowed = ROLE_ALLOWED_PAGES[role] || [];
+    if (!allowed.includes(currentPage)) {
+      const defaultPage = getRoleDefaultPage(role);
+      if (defaultPage === 'tenders') return <ContractorPortalPage onOpenProject={handleOpenProject} />;
+      if (defaultPage === 'inspection') return <FieldInspectionPage initialProjectId={activeProjectId} onOpenProject={handleOpenProject} />;
+      return <LandingPage onNavigate={setCurrentPage} onOpenProject={handleOpenProject} />;
+    }
+
     switch (currentPage) {
       case 'landing':
         return <LandingPage onNavigate={setCurrentPage} onOpenProject={handleOpenProject} />;
@@ -213,10 +268,12 @@ const AppContent: React.FC = () => {
         );
       case 'funds':
         return <FundFlowPage onOpenProject={handleOpenProject} />;
+      case 'tenders':
+        return <ContractorPortalPage onOpenProject={handleOpenProject} />;
       case 'contracts':
-        return <ContractsPage onOpenProject={handleOpenProject} />;
+        return <ContractsPage onOpenProject={handleOpenProject} onSelectContractor={handleSelectContractor} />;
       case 'contractors':
-        return <ContractorProfilePage onOpenProject={handleOpenProject} />;
+        return <ContractorProfilePage onOpenProject={handleOpenProject} initialContractorId={activeContractorId} />;
       case 'ai-risk':
         return <AIRiskCenterPage onOpenProject={handleOpenProject} />;
       case 'disputes':
@@ -224,9 +281,10 @@ const AppContent: React.FC = () => {
       case 'guarantees':
         return <GuaranteesPage onOpenProject={handleOpenProject} />;
       case 'inspection':
+        if (isCitizen) return <CitizenComplaintPage key={`complaints-${language}`} initialProjectId={activeProjectId} onOpenProject={handleOpenProject} onNavigate={navigateTo} />;
         return <FieldInspectionPage initialProjectId={activeProjectId} onOpenProject={handleOpenProject} />;
       case 'complaints':
-        return <CitizenComplaintPage initialProjectId={activeProjectId} onOpenProject={handleOpenProject} onNavigate={navigateTo} />;
+        return <CitizenComplaintPage key={`complaints-${language}`} initialProjectId={activeProjectId} onOpenProject={handleOpenProject} onNavigate={navigateTo} />;
       case 'alerts':
         return <AlertsEscalationPage onOpenProject={handleOpenProject} />;
       case 'reports':
@@ -234,14 +292,15 @@ const AppContent: React.FC = () => {
       case 'audit':
         return <AuditLogsPage />;
       case 'admin':
-        return <AdminDataPage />;
+        if (isCitizen) return <PublicExplorer initialSearch={globalSearch} onOpenProject={handleOpenProject} onViewMap={handleViewOnMap} onInspect={handleInspectProject} onComplaint={handleFileComplaint} />;
+        return <AdminDataPage onOpenProject={handleOpenProject} />;
       default:
         return <LandingPage onNavigate={navigateTo} onOpenProject={handleOpenProject} />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       <Navbar
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         onSearchSelect={handleGlobalSearch}
@@ -261,8 +320,8 @@ const AppContent: React.FC = () => {
         </main>
       </div>
 
-      {/* Official Government Light Prototype Footer */}
-      <footer className="bg-[#F7F3EB] text-slate-600 text-xs py-7 border-t border-amber-200/80 no-print">
+      {/* Official Government Clean Prototype Footer */}
+      <footer className="bg-white text-slate-600 text-xs py-7 border-t border-slate-200 no-print">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-7 h-7 rounded-xl bg-gradient-to-tr from-orange-600 to-amber-600 text-white font-black flex items-center justify-center text-[10px] shadow-xs">
@@ -291,7 +350,7 @@ const queryClient = new QueryClient({
     queries: {
       refetchOnWindowFocus: false,
       staleTime: 1000 * 60 * 5,
-      retry: 1,
+      retry: false,
     },
   },
 });

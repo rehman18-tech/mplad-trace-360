@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../services/api';
+import { api, GOVERNMENT_DEPARTMENTS } from '../services/api';
 import { Project } from '../types';
 import { RiskBadge } from '../components/common/RiskBadge';
 import { SourceTag } from '../components/common/SourceTag';
@@ -7,11 +7,12 @@ import { EmptyState } from '../components/common/EmptyState';
 import { formatIndianCurrency } from '../components/common/StatCard';
 import { useToast } from '../context/ToastContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import { 
   Search, Filter, MapPin, IndianRupee, ArrowRight, Eye, Calendar, 
   RotateCcw, ShieldCheck, CheckCircle2, AlertCircle, Smartphone, 
   MessageSquareQuote, Droplet, GraduationCap, Stethoscope, Construction,
-  Landmark, Sun, Waves, Trash2, Layers
+  Landmark, Sun, Waves, Trash2, Layers, Edit3, Building2, X, Check, RefreshCw, Camera
 } from 'lucide-react';
 
 interface PublicExplorerProps {
@@ -45,9 +46,72 @@ export const PublicExplorer: React.FC<PublicExplorerProps> = ({
 }) => {
   const { showToast } = useToast();
   const { t } = useLanguage();
+  const { role, userName, userDesignation, isDistrictAuthority, isAdmin } = useAuth();
   const [allProjects, setAllProjects] = useState<Project[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Direct Higher Official Project Edit state
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editDept, setEditDept] = useState(GOVERNMENT_DEPARTMENTS[0]);
+  const [editProgress, setEditProgress] = useState(0);
+  const [editStatus, setEditStatus] = useState<Project['status']>('UNDER PROGRESS');
+  const [editFundsPaid, setEditFundsPaid] = useState('0');
+  const [editOrderRef, setEditOrderRef] = useState('');
+  const [editReason, setEditReason] = useState('');
+  const [isSubmittingEdit, setIsSubmittingEdit] = useState(false);
+
+  const openEditModal = (proj: Project) => {
+    setEditingProject(proj);
+    const matched = GOVERNMENT_DEPARTMENTS.find(d => 
+      proj.implementing_agency?.toLowerCase().includes(d.toLowerCase()) || 
+      (proj.data_source && proj.data_source.includes(d))
+    ) || GOVERNMENT_DEPARTMENTS[0];
+    setEditDept(matched);
+    setEditProgress(proj.physical_progress);
+    setEditStatus(proj.status);
+    setEditFundsPaid(proj.funds_paid?.toString() || '0');
+    setEditOrderRef(`MB-${Math.floor(100 + Math.random() * 900)}/REV/2026`);
+    setEditReason('Physical progress certified on-site with Measurement Book verification and statutory milestone sign-off.');
+    setShowEditModal(true);
+  };
+
+  const handleUpdateProject = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingProject) return;
+    if (!editReason.trim()) {
+      showToast('Modification reason is required for statutory attribution', 'error');
+      return;
+    }
+    setIsSubmittingEdit(true);
+    try {
+      const updated = await api.updateProject(
+        editingProject.id,
+        {
+          physical_progress: Number(editProgress),
+          status: editStatus,
+          funds_paid: Number(editFundsPaid) || 0,
+          actual_expenditure: Number(editFundsPaid) || editingProject.actual_expenditure,
+        },
+        {
+          officer_name: userName,
+          officer_role: role,
+          department_name: editDept,
+          modification_reason: editReason.trim(),
+          order_reference_no: editOrderRef.trim(),
+        }
+      );
+      setProjects(prev => prev.map(p => p.id === updated.id ? updated : p));
+      showToast(`Work ${updated.id} successfully updated by ${userName} (${editDept})!`, 'success');
+      setShowEditModal(false);
+      setEditingProject(null);
+    } catch (err: any) {
+      showToast(`Update error: ${err.message || 'Failed to save update'}`, 'error');
+    } finally {
+      setIsSubmittingEdit(false);
+    }
+  };
 
   // Filter states
   const [search, setSearch] = useState(initialSearch || '');
@@ -155,7 +219,7 @@ export const PublicExplorer: React.FC<PublicExplorerProps> = ({
 
           <button
             onClick={resetFilters}
-            className="text-xs font-bold text-slate-700 hover:text-amber-950 flex items-center gap-2 self-start md:self-auto px-4 py-2.5 rounded-xl border border-amber-200 bg-[#FCFAF7] hover:bg-amber-50 transition-all shadow-xs"
+            className="text-xs font-bold text-slate-700 hover:text-slate-900 flex items-center gap-2 self-start md:self-auto px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-all shadow-xs"
           >
             <RotateCcw className="w-3.5 h-3.5 text-orange-600" />
             <span>{t('reset_filters')}</span>
@@ -163,8 +227,8 @@ export const PublicExplorer: React.FC<PublicExplorerProps> = ({
         </div>
 
         {/* 8 Department Quick Filter Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto py-3 border-b border-amber-100">
-          <span className="text-xs font-mono font-bold text-amber-950 uppercase tracking-widest text-[10px] shrink-0 pr-1">
+        <div className="flex items-center gap-2 overflow-x-auto py-3 border-b border-slate-200">
+          <span className="text-xs font-mono font-bold text-slate-500 uppercase tracking-widest text-[10px] shrink-0 pr-1">
             Department:
           </span>
           {DEPT_PILLS.map(dept => {
@@ -181,7 +245,7 @@ export const PublicExplorer: React.FC<PublicExplorerProps> = ({
                 className={`px-3.5 py-1.5 rounded-full text-xs whitespace-nowrap transition-all flex items-center gap-1.5 shrink-0 ${
                   isSelected
                     ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-xs ring-2 ring-orange-400 font-bold'
-                    : 'bg-[#FCFAF7] text-slate-700 hover:bg-amber-50 hover:text-amber-950 border border-amber-200/80 font-medium'
+                    : 'bg-white text-slate-700 hover:bg-slate-100 hover:text-slate-900 border border-slate-200 font-medium'
                 }`}
               >
                 <Icon className={`w-3.5 h-3.5 ${isSelected ? 'text-white' : 'text-slate-500'}`} />
@@ -206,7 +270,7 @@ export const PublicExplorer: React.FC<PublicExplorerProps> = ({
               placeholder={t('search_placeholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-[#FAF7F0] border border-amber-200/90 focus:border-amber-500 rounded-2xl pl-10 sm:pl-11 pr-24 sm:pr-48 py-3 text-xs md:text-sm text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 transition-all shadow-inner"
+              className="w-full bg-slate-50 border border-slate-200 focus:border-orange-500 rounded-2xl pl-10 sm:pl-11 pr-24 sm:pr-48 py-3 text-xs md:text-sm text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all shadow-xs"
             />
             {search && (
               <button
@@ -216,7 +280,7 @@ export const PublicExplorer: React.FC<PublicExplorerProps> = ({
                   fetchProjects('');
                   showToast('Search query cleared', 'info');
                 }}
-                className="absolute right-16 sm:right-28 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-800 text-xs font-bold px-2 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 transition-colors shadow-2xs"
+                className="absolute right-16 sm:right-28 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-800 text-xs font-bold px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors shadow-xs"
                 title="Clear Search"
               >
                 ✕ <span className="hidden sm:inline">{t('clear_button')}</span>
@@ -363,11 +427,30 @@ export const PublicExplorer: React.FC<PublicExplorerProps> = ({
                 className="glass-card rounded-2xl p-5 border border-slate-200/90 hover:border-slate-300 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group bg-white/90"
               >
                 <div>
-                  {/* Top ID & Risk Badge */}
-                  <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-slate-100 text-xs">
-                    <span className="font-mono font-bold text-slate-400 uppercase text-[11px] tracking-wide">
-                      {proj.id}
-                    </span>
+                  {/* Top ID, Baseline Status & Risk Badge */}
+                  <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-slate-100 text-xs gap-2">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="font-mono font-bold text-slate-500 uppercase text-[11px] tracking-wide">
+                        {proj.id}
+                      </span>
+                      {proj.baseline_photo_url ? (
+                        <span 
+                          className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 flex items-center gap-1 shadow-2xs"
+                          title="Statutory DPR Baseline Photo Anchored"
+                        >
+                          <Camera className="w-3 h-3 text-emerald-600" />
+                          <span>Baseline Captured</span>
+                        </span>
+                      ) : (
+                        <span 
+                          className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-300 flex items-center gap-1 shadow-2xs"
+                          title="Statutory DPR Baseline Photo Not Yet Uploaded"
+                        >
+                          <AlertCircle className="w-3 h-3 text-amber-600" />
+                          <span>No Baseline</span>
+                        </span>
+                      )}
+                    </div>
                     <RiskBadge level={proj.risk_level} size="sm" />
                   </div>
 
@@ -455,10 +538,22 @@ export const PublicExplorer: React.FC<PublicExplorerProps> = ({
                     <ArrowRight className="w-3.5 h-3.5 text-white" />
                   </button>
 
-                  {onInspect && (
+                  {/* Higher Authority Edit Button - only visible to authorized officials */}
+                  {(isDistrictAuthority || isAdmin) && (
+                    <button
+                      onClick={() => openEditModal(proj)}
+                      className="py-2 px-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 font-bold rounded-xl transition-colors flex items-center gap-1 cursor-pointer shadow-2xs"
+                      title="Statutory Physical Progress & Project Edit (Higher Authority)"
+                    >
+                      <Edit3 className="w-3.5 h-3.5 text-indigo-700" />
+                      <span>Edit</span>
+                    </button>
+                  )}
+
+                  {onInspect && (role === 'FIELD_OFFICER' || role === 'DISTRICT_AUTHORITY' || role === 'VIGILANCE_AUDITOR' || role === 'ADMIN') && (
                     <button
                       onClick={() => onInspect(proj.id)}
-                      className="py-2 px-2.5 bg-[#FCFAF7] hover:bg-amber-100/70 text-slate-700 font-semibold rounded-xl border border-amber-200/80 transition-colors flex items-center gap-1"
+                      className="py-2 px-2.5 bg-white hover:bg-slate-50 text-slate-700 font-semibold rounded-xl border border-slate-200 transition-colors flex items-center gap-1 cursor-pointer"
                       title="Conduct Geotagged Field Inspection"
                     >
                       <Smartphone className="w-3.5 h-3.5 text-orange-600" />
@@ -466,10 +561,10 @@ export const PublicExplorer: React.FC<PublicExplorerProps> = ({
                     </button>
                   )}
 
-                  {onComplaint && (
+                  {onComplaint && role !== 'CONTRACTOR' && role !== 'FIELD_OFFICER' && (
                     <button
                       onClick={() => onComplaint(proj.id)}
-                      className="py-2 px-2.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 font-semibold rounded-xl transition-colors flex items-center gap-1"
+                      className="py-2 px-2.5 bg-orange-50 hover:bg-orange-100 text-orange-900 border border-orange-200 font-semibold rounded-xl transition-colors flex items-center gap-1 cursor-pointer"
                       title="Report Citizen Grievance"
                     >
                       <MessageSquareQuote className="w-3.5 h-3.5 text-orange-600" />
@@ -477,17 +572,192 @@ export const PublicExplorer: React.FC<PublicExplorerProps> = ({
                     </button>
                   )}
 
-                  <button
-                    onClick={() => onViewMap(proj.id)}
-                    className="p-2 bg-[#FCFAF7] text-slate-700 hover:bg-amber-100/70 font-semibold rounded-xl border border-amber-200/80 transition-colors flex items-center justify-center"
-                    title="View Location on Interactive India Map"
-                  >
-                    <MapPin className="w-3.5 h-3.5 text-orange-600" />
-                  </button>
+                  {role !== 'CONTRACTOR' && (
+                    <button
+                      onClick={() => onViewMap(proj.id)}
+                      className="p-2 bg-white text-slate-700 hover:bg-slate-50 font-semibold rounded-xl border border-slate-200 transition-colors flex items-center justify-center cursor-pointer"
+                      title="View Location on Interactive India Map"
+                    >
+                      <MapPin className="w-3.5 h-3.5 text-orange-600" />
+                    </button>
+                  )}
                 </div>
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Direct Higher Official Project Edit Modal */}
+      {showEditModal && editingProject && (
+        <div 
+          onClick={(e) => { if (e.target === e.currentTarget) setShowEditModal(false); }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto"
+        >
+          <div className="bg-white rounded-2xl border border-gov-ivory-border shadow-2xl max-w-xl w-full my-8 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            {/* Modal Header */}
+            <div className="bg-gov-navy text-white px-6 py-4 flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-bold flex items-center gap-2">
+                  <Edit3 className="w-5 h-5 text-gov-saffron" />
+                  <span>Statutory Project Physical Progress &amp; Data Update</span>
+                </h3>
+                <p className="text-[11px] text-slate-300 mt-0.5">
+                  Project: <strong className="text-white">{editingProject.id}</strong> — {editingProject.title}
+                </p>
+              </div>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="p-1 rounded-lg hover:bg-white/10 text-white transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Department Attribution Banner */}
+            <div className="bg-indigo-50 border-b border-indigo-200 px-6 py-2.5 text-[11px] text-indigo-900 flex items-center gap-2">
+              <Building2 className="w-4 h-4 text-indigo-700 shrink-0" />
+              <span>
+                <strong>Departmental Attribution:</strong> Attributed to <strong>{editDept}</strong> and authorized by <strong>{userName}</strong> ({role}).
+              </span>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleUpdateProject} className="p-6 space-y-4 text-xs">
+              <div>
+                <label className="block font-bold text-gov-navy mb-1">
+                  Responsible / Authorizing Department *
+                </label>
+                <select
+                  value={editDept}
+                  onChange={(e) => setEditDept(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white focus:outline-none focus:border-gov-navy font-semibold text-slate-800"
+                >
+                  {GOVERNMENT_DEPARTMENTS.map(dept => (
+                    <option key={dept} value={dept}>{dept}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Physical Progress Slider */}
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-gov-navy">Certified Physical Progress (%):</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={editProgress}
+                      onChange={(e) => setEditProgress(Math.min(100, Math.max(0, parseInt(e.target.value) || 0)))}
+                      className="w-16 px-2 py-1 text-center font-black text-gov-navy border border-slate-300 rounded-lg bg-white"
+                    />
+                    <span className="font-bold text-gov-navy text-sm">%</span>
+                  </div>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={editProgress}
+                  onChange={(e) => setEditProgress(parseInt(e.target.value))}
+                  className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-gov-navy"
+                />
+                <div className="flex justify-between text-[10px] text-slate-400 font-semibold">
+                  <span>0% (Commenced)</span>
+                  <span>50% (Intermediate Milestone)</span>
+                  <span>100% (Completed)</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-bold text-gov-navy mb-1">
+                    Statutory Project Status
+                  </label>
+                  <select
+                    value={editStatus}
+                    onChange={(e) => setEditStatus(e.target.value as any)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white focus:outline-none focus:border-gov-navy font-semibold"
+                  >
+                    <option value="RECOMMENDED">RECOMMENDED</option>
+                    <option value="SANCTIONED">SANCTIONED</option>
+                    <option value="TENDERED">TENDERED</option>
+                    <option value="UNDER PROGRESS">UNDER PROGRESS</option>
+                    <option value="COMPLETED">COMPLETED</option>
+                    <option value="STALLED">STALLED</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-gov-navy mb-1">
+                    Funds Disbursed to Contractor (₹)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="5000"
+                    value={editFundsPaid}
+                    onChange={(e) => setEditFundsPaid(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:border-gov-navy font-mono"
+                  />
+                  <span className="text-[10px] text-slate-400 mt-0.5 block">
+                    Sanction Ceiling: {formatIndianCurrency(editingProject.sanctioned_amount)}
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-gov-navy mb-1">
+                  Measurement Book / Order Reference Number *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g., MB-741/PWD/2026 or GO/MS/108"
+                  value={editOrderRef}
+                  onChange={(e) => setEditOrderRef(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:border-gov-navy font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-gov-navy mb-1">
+                  Mandatory Modification Justification *
+                </label>
+                <textarea
+                  rows={2}
+                  required
+                  value={editReason}
+                  onChange={(e) => setEditReason(e.target.value)}
+                  placeholder="Specify official reason, on-site technical inspection findings, or contract milestone justification..."
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:border-gov-navy"
+                />
+                <span className="text-[10px] text-slate-400 mt-0.5 block">
+                  Mandated by MoSPI Clause 4.2 for digital audit tracking.
+                </span>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="pt-3 border-t border-slate-200 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="px-4 py-2 border border-slate-300 text-slate-600 hover:bg-slate-100 rounded-xl font-bold transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingEdit}
+                  className="px-6 py-2 bg-gov-navy hover:bg-gov-navy-light text-white font-bold rounded-xl shadow-gov transition-colors flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                >
+                  {isSubmittingEdit ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                  <span>Save Physical Update &amp; Log Audit</span>
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

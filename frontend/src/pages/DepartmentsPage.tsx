@@ -254,7 +254,7 @@ export const DepartmentsPage: React.FC<DepartmentsPageProps> = ({
                 className={`p-3.5 rounded-2xl border text-left transition-all flex flex-col justify-between group transform hover:-translate-y-0.5 ${
                   isSelected
                     ? `bg-gradient-to-br from-amber-50 via-orange-50/50 to-amber-100/60 border-amber-400 ring-2 ring-orange-400 text-amber-950 font-bold shadow-sm`
-                    : `bg-[#FCFAF7] hover:bg-amber-50/60 border-amber-200/80 text-slate-700 hover:border-amber-300 hover:shadow-xs`
+                    : `bg-white hover:bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300 hover:shadow-xs`
                 }`}
               >
                 <div className="flex items-center justify-between w-full mb-3">

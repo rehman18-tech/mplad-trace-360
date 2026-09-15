@@ -1,5 +1,5 @@
 // MPLAD-TRACE 360 Progressive Web App Service Worker
-const CACHE_NAME = 'mplad-trace-v1.2';
+const CACHE_NAME = 'mplad-trace-v1.3';
 
 const STATIC_ASSETS = [
   '/',

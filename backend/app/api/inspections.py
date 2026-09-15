@@ -3,7 +3,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..database import get_db
-from ..models.schema import Inspection, Project, AuditLog
+from ..models.schema import Inspection, Project, AuditLog, Alert
 from ..schemas.schemas import InspectionSchema, InspectionCreate
 from ..services.cv_verifier import verify_inspection_evidence
 from ..services.risk_engine import calculate_project_risk
@@ -56,17 +56,40 @@ def submit_inspection(data: InspectionCreate, db: Session = Depends(get_db)):
         ai_cv_similarity_score=verification["cv_similarity_score"],
         ai_progress_discrepancy_pct=verification["progress_discrepancy_pct"],
         ai_verification_notes=verification["verification_notes"],
-        status="VERIFIED" if verification["gps_matched"] else "REQUIRES_VERIFICATION"
+        status=verification["status"]
     )
     db.add(inspection)
 
-    # Update project state
-    project.physical_progress = data.physical_progress_observed
+    # Sovereign AI Gatekeeper: Human claims never unilaterally dictate official progress
+    governing_prog = verification.get("governing_progress", data.physical_progress_observed)
+    project.physical_progress = governing_prog
     project.last_inspected_date = datetime.utcnow().strftime("%Y-%m-%d")
+    
     if data.stalled_status:
         project.status = "STALLED"
-    elif data.physical_progress_observed >= 100.0:
+    elif governing_prog >= 100.0:
         project.status = "COMPLETED"
+
+    if verification.get("arbitration_verdict") == "COLLUSION_ALERT":
+        collusion_alert = Alert(
+            id=f"ALT-CVC-{datetime.utcnow().strftime('%H%M%S')}",
+            project_id=project.id,
+            project_title=project.title,
+            severity="CRITICAL",
+            category="Collusion & Fraud Prevention",
+            title=f"Statutory Overrule: Inspector Claim ({data.physical_progress_observed}%) Overruled by AI Vision ({verification['ai_detected_progress']}%)",
+            description=verification["verification_notes"],
+            observed_data=f"Inspector Claim: {data.physical_progress_observed}% | AI Computer Vision Ground Truth: {verification['ai_detected_progress']}%",
+            expected_data="Statutory milestone tolerance <= 10% discrepancy under MoSPI norms",
+            difference=f"Severe discrepancy delta of {verification['progress_discrepancy_pct']}% detected",
+            confidence_score=verification["cv_similarity_score"],
+            recommended_action="Milestone escrow payment frozen immediately. Deploy cross-cadre blind vigilance auditor for ground re-audit.",
+            escalation_level="Level 3 - Vigilance / Anti-Corruption Branch",
+            assigned_authority="Chief Vigilance Officer (CVO) & District Collector",
+            due_days=2,
+            status="OPEN"
+        )
+        db.add(collusion_alert)
 
     # Recalculate Risk
     risk_result = calculate_project_risk(

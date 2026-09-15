@@ -4,7 +4,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import { 
   LayoutDashboard, FolderKanban, MapPin, IndianRupee, FileText, 
   Users, AlertTriangle, Scale, ShieldAlert, Smartphone, MessageSquareQuote, 
-  BellRing, FileCheck, Files, History, Settings, ChevronRight, Layers
+  BellRing, FileCheck, Files, History, Settings, ChevronRight, Layers, Gavel, Sparkles
 } from 'lucide-react';
 
 import { UserRole } from '../../types';
@@ -23,28 +23,29 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpe
   const navItems: Array<{
     id: string;
     label: string;
-    icon: any;
+    icon: React.ComponentType<{ className?: string }>;
     categoryKey: string;
     categoryLabel: string;
     badge?: string;
     badgeType?: string;
     allowedRoles?: UserRole[];
   }> = [
-    { id: 'landing', label: t('nav_landing'), icon: LayoutDashboard, categoryKey: 'cat_core', categoryLabel: t('cat_core') },
-    { id: 'departments', label: t('nav_departments'), icon: Layers, categoryKey: 'cat_core', categoryLabel: t('cat_core'), badge: '8', badgeType: 'info' },
+    { id: 'landing', label: t('nav_landing'), icon: LayoutDashboard, categoryKey: 'cat_core', categoryLabel: t('cat_core'), allowedRoles: ['CITIZEN', 'FIELD_OFFICER', 'DISTRICT_AUTHORITY', 'ADMIN', 'VIGILANCE_AUDITOR'] },
+    { id: 'departments', label: t('nav_departments'), icon: Layers, categoryKey: 'cat_core', categoryLabel: t('cat_core'), badge: '8', badgeType: 'info', allowedRoles: ['CITIZEN', 'DISTRICT_AUTHORITY', 'ADMIN', 'VIGILANCE_AUDITOR'] },
     { id: 'projects', label: t('nav_projects'), icon: FolderKanban, categoryKey: 'cat_core', categoryLabel: t('cat_core') },
-    { id: 'map', label: t('nav_map'), icon: MapPin, categoryKey: 'cat_core', categoryLabel: t('cat_core') },
-    { id: 'funds', label: t('nav_funds'), icon: IndianRupee, categoryKey: 'cat_financials', categoryLabel: t('cat_financials'), allowedRoles: ['CITIZEN', 'DISTRICT_AUTHORITY', 'ADMIN'] },
-    { id: 'contracts', label: t('nav_contracts'), icon: FileText, categoryKey: 'cat_financials', categoryLabel: t('cat_financials'), allowedRoles: ['FIELD_OFFICER', 'DISTRICT_AUTHORITY', 'ADMIN'] },
-    { id: 'contractors', label: t('nav_contractors'), icon: Users, categoryKey: 'cat_financials', categoryLabel: t('cat_financials'), allowedRoles: ['DISTRICT_AUTHORITY', 'ADMIN'] },
-    { id: 'ai-risk', label: t('nav_ai_risk'), icon: AlertTriangle, badge: '24', badgeType: 'alert', categoryKey: 'cat_intelligence', categoryLabel: t('cat_intelligence'), allowedRoles: ['DISTRICT_AUTHORITY', 'ADMIN'] },
-    { id: 'disputes', label: t('nav_disputes'), icon: Scale, badge: '8', badgeType: 'warning', categoryKey: 'cat_intelligence', categoryLabel: t('cat_intelligence'), allowedRoles: ['DISTRICT_AUTHORITY', 'ADMIN'] },
-    { id: 'guarantees', label: t('nav_guarantees'), icon: ShieldAlert, badge: '4', badgeType: 'critical', categoryKey: 'cat_intelligence', categoryLabel: t('cat_intelligence'), allowedRoles: ['DISTRICT_AUTHORITY', 'ADMIN'] },
-    { id: 'inspection', label: t('nav_inspections'), icon: Smartphone, categoryKey: 'cat_ground_ops', categoryLabel: t('cat_ground_ops'), allowedRoles: ['FIELD_OFFICER', 'DISTRICT_AUTHORITY'] },
-    { id: 'complaints', label: t('nav_complaints'), icon: MessageSquareQuote, categoryKey: 'cat_ground_ops', categoryLabel: t('cat_ground_ops') },
-    { id: 'alerts', label: t('nav_alerts'), icon: BellRing, badge: '12', badgeType: 'alert', categoryKey: 'cat_governance', categoryLabel: t('cat_governance'), allowedRoles: ['DISTRICT_AUTHORITY', 'ADMIN'] },
-    { id: 'reports', label: t('nav_reports'), icon: FileCheck, categoryKey: 'cat_governance', categoryLabel: t('cat_governance') },
-    { id: 'audit', label: t('nav_audit'), icon: History, categoryKey: 'cat_administration', categoryLabel: t('cat_administration'), allowedRoles: ['ADMIN'] },
+    { id: 'map', label: t('nav_map'), icon: MapPin, categoryKey: 'cat_core', categoryLabel: t('cat_core'), allowedRoles: ['CITIZEN', 'FIELD_OFFICER', 'DISTRICT_AUTHORITY', 'ADMIN', 'VIGILANCE_AUDITOR'] },
+    { id: 'tenders', label: 'e-Tender Bidding', icon: Gavel, categoryKey: 'cat_financials', categoryLabel: t('cat_financials'), badge: 'OPEN', badgeType: 'info', allowedRoles: ['CONTRACTOR', 'DISTRICT_AUTHORITY', 'ADMIN', 'VIGILANCE_AUDITOR'] },
+    { id: 'funds', label: t('nav_funds'), icon: IndianRupee, categoryKey: 'cat_financials', categoryLabel: t('cat_financials'), allowedRoles: ['CITIZEN', 'DISTRICT_AUTHORITY', 'ADMIN', 'VIGILANCE_AUDITOR'] },
+    { id: 'contracts', label: t('nav_contracts'), icon: FileText, categoryKey: 'cat_financials', categoryLabel: t('cat_financials'), allowedRoles: ['DISTRICT_AUTHORITY', 'ADMIN', 'VIGILANCE_AUDITOR'] },
+    { id: 'contractors', label: t('nav_contractors'), icon: Users, categoryKey: 'cat_financials', categoryLabel: t('cat_financials'), allowedRoles: ['DISTRICT_AUTHORITY', 'ADMIN', 'VIGILANCE_AUDITOR'] },
+    { id: 'ai-risk', label: t('nav_ai_risk'), icon: AlertTriangle, badge: '24', badgeType: 'alert', categoryKey: 'cat_intelligence', categoryLabel: t('cat_intelligence'), allowedRoles: ['DISTRICT_AUTHORITY', 'ADMIN', 'VIGILANCE_AUDITOR'] },
+    { id: 'disputes', label: t('nav_disputes'), icon: Scale, badge: '8', badgeType: 'warning', categoryKey: 'cat_intelligence', categoryLabel: t('cat_intelligence'), allowedRoles: ['DISTRICT_AUTHORITY', 'ADMIN', 'VIGILANCE_AUDITOR'] },
+    { id: 'guarantees', label: t('nav_guarantees'), icon: ShieldAlert, badge: '4', badgeType: 'critical', categoryKey: 'cat_intelligence', categoryLabel: t('cat_intelligence'), allowedRoles: ['DISTRICT_AUTHORITY', 'ADMIN', 'VIGILANCE_AUDITOR', 'CONTRACTOR'] },
+    { id: 'inspection', label: t('nav_inspections'), icon: Smartphone, categoryKey: 'cat_ground_ops', categoryLabel: t('cat_ground_ops'), allowedRoles: ['FIELD_OFFICER', 'DISTRICT_AUTHORITY', 'VIGILANCE_AUDITOR', 'ADMIN'] },
+    { id: 'complaints', label: t('nav_complaints'), icon: MessageSquareQuote, categoryKey: 'cat_ground_ops', categoryLabel: t('cat_ground_ops'), allowedRoles: ['CITIZEN', 'DISTRICT_AUTHORITY', 'ADMIN', 'VIGILANCE_AUDITOR'] },
+    { id: 'alerts', label: t('nav_alerts'), icon: BellRing, badge: '12', badgeType: 'alert', categoryKey: 'cat_governance', categoryLabel: t('cat_governance'), allowedRoles: ['DISTRICT_AUTHORITY', 'ADMIN', 'VIGILANCE_AUDITOR'] },
+    { id: 'reports', label: t('nav_reports'), icon: FileCheck, categoryKey: 'cat_governance', categoryLabel: t('cat_governance'), allowedRoles: ['FIELD_OFFICER', 'DISTRICT_AUTHORITY', 'ADMIN', 'VIGILANCE_AUDITOR'] },
+    { id: 'audit', label: t('nav_audit'), icon: History, categoryKey: 'cat_administration', categoryLabel: t('cat_administration'), allowedRoles: ['DISTRICT_AUTHORITY', 'ADMIN', 'VIGILANCE_AUDITOR'] },
     { id: 'admin', label: t('nav_admin'), icon: Settings, categoryKey: 'cat_administration', categoryLabel: t('cat_administration'), allowedRoles: ['ADMIN'] },
   ];
 
@@ -65,7 +66,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpe
       )}
 
       <aside
-        className={`fixed lg:sticky top-[53px] left-0 h-[calc(100dvh-53px)] max-h-[calc(100dvh-53px)] w-64 bg-[#FCFAF7]/95 backdrop-blur-md border-r border-amber-200/80 flex flex-col z-30 transition-transform duration-300 ease-in-out ${
+        className={`fixed lg:sticky top-[53px] left-0 h-[calc(100dvh-53px)] max-h-[calc(100dvh-53px)] w-64 bg-white/95 backdrop-blur-md border-r border-slate-200 flex flex-col z-30 transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
@@ -75,8 +76,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpe
             const catTitle = catItems[0]?.categoryLabel || t(catKey);
             return (
               <div key={catKey}>
-                <p className="px-3 text-[10px] font-mono font-bold tracking-widest text-amber-950/80 uppercase mb-1.5 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                <p className="px-3 text-[10px] font-mono font-bold tracking-widest text-slate-500 uppercase mb-1.5 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
                   <span>{catTitle}</span>
                 </p>
                 <div className="space-y-0.5">
@@ -92,8 +93,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpe
                         }}
                         className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all group ${
                           isActive
-                            ? 'bg-gradient-to-r from-amber-100/90 to-orange-50/60 text-amber-950 font-bold border-l-3 border-amber-600 shadow-xs'
-                            : 'text-slate-700 hover:bg-amber-100/50 hover:text-amber-900'
+                            ? 'bg-orange-50 text-orange-950 font-bold border-l-3 border-orange-600 shadow-xs'
+                            : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
                         }`}
                       >
                         <div className="flex items-center gap-2.5 truncate">
@@ -107,12 +108,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpe
                           <span
                             className={`text-[10px] font-mono font-bold px-2 py-0.2 rounded-full border ${
                               isActive
-                                ? 'bg-amber-200/90 text-amber-950 border-amber-300'
+                                ? 'bg-orange-100 text-orange-900 border-orange-300'
                                 : item.badgeType === 'critical'
                                 ? 'bg-rose-50 text-rose-700 border-rose-200'
                                 : item.badgeType === 'alert'
                                 ? 'bg-orange-50 text-orange-700 border-orange-200'
-                                : 'bg-amber-50 text-amber-800 border-amber-200'
+                                : 'bg-slate-100 text-slate-700 border-slate-200'
                             }`}
                           >
                             {item.badge}
@@ -128,7 +129,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpe
         </div>
 
         {/* Sidebar Footer: System Status */}
-        <div className="p-3 bg-[#F7F3EB] border-t border-amber-200/80 text-xs shrink-0">
+        <div className="p-3 bg-slate-50 border-t border-slate-200 text-xs shrink-0">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-slate-700">PFMS Node Latency</span>
             <span className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">

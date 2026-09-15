@@ -5,7 +5,7 @@ import { formatIndianCurrency } from '../components/common/StatCard';
 import { useLanguage } from '../context/LanguageContext';
 import { 
   ArrowRight, ShieldCheck, Search, MapPin, Eye, CheckCircle2, 
-  Cpu, AlertTriangle, Scale, Clock, Users, Building, FileCheck, Layers, Sparkles
+  Cpu, AlertTriangle, Scale, Clock, Users, Building, Layers, Sparkles
 } from 'lucide-react';
 
 interface LandingPageProps {
@@ -293,22 +293,22 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onOpenProj
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 text-xs">
-          <div className="p-4 bg-[#FCFAF7] rounded-xl border border-amber-100">
+          <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
             <span className="text-slate-500 font-medium block">Sanctioned Outlay</span>
             <span className="text-lg font-black text-slate-900 mt-1 block">₹29,50,000</span>
             <span className="text-[10px] text-slate-500 font-mono">MoSPI Ref #PRED-847</span>
           </div>
-          <div className="p-4 bg-[#FCFAF7] rounded-xl border border-amber-100">
+          <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
             <span className="text-slate-500 font-medium block">Physical Progress</span>
             <span className="text-lg font-black text-emerald-700 mt-1 block">72.0%</span>
             <span className="text-[10px] text-emerald-800 font-semibold">Verified via MB Record</span>
           </div>
-          <div className="p-4 bg-[#FCFAF7] rounded-xl border border-amber-100">
+          <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
             <span className="text-slate-500 font-medium block">Schedule Slippage</span>
             <span className="text-lg font-black text-rose-600 mt-1 block">84 Days Delay</span>
             <span className="text-[10px] text-slate-500">Truss Fabrication Dispute</span>
           </div>
-          <div className="p-4 bg-[#FCFAF7] rounded-xl border border-amber-100">
+          <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
             <span className="text-slate-500 font-medium block">Autonomous Risk Score</span>
             <span className="text-lg font-black text-orange-700 mt-1 block">67 / 100</span>
             <span className="text-[10px] text-orange-800 font-semibold">{t('risk_high')}</span>
@@ -317,7 +317,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onOpenProj
       </section>
 
       {/* How It Works: The 6-Step Protocol */}
-      <section className="bg-white rounded-3xl p-8 md:p-10 border border-amber-200/80 shadow-md">
+      <section className="bg-white rounded-3xl p-8 md:p-10 border border-slate-200 shadow-sm">
         <div className="text-center max-w-2xl mx-auto mb-10">
           <span className="text-xs font-mono font-bold text-orange-700 tracking-wider uppercase">System Protocol</span>
           <h2 className="text-2xl md:text-3xl font-black text-slate-900 mt-1.5">How MPLAD-TRACE 360 Works</h2>
@@ -328,7 +328,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onOpenProj
 
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {steps.map((s, idx) => (
-            <div key={idx} className="p-5 rounded-2xl bg-[#FCFAF7] border border-amber-200/70 flex flex-col justify-between hover:border-amber-400 hover:shadow-md transition-all group">
+            <div key={idx} className="p-5 rounded-2xl bg-white border border-slate-200 flex flex-col justify-between hover:border-slate-300 hover:shadow-md transition-all group">
               <div>
                 <span className="text-xs font-mono font-extrabold text-orange-600 block mb-2">{s.num}</span>
                 <h4 className="text-sm font-bold text-slate-900 mb-1.5 group-hover:text-orange-700 transition-colors">{s.title}</h4>
@@ -340,7 +340,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onOpenProj
       </section>
 
       {/* Light Circuit Banner: One Project. Complete Lifecycle */}
-      <section className="bg-gradient-to-br from-[#FFFDF9] via-[#FAF5EC] to-[#F1F8F2] text-slate-900 rounded-3xl p-8 md:p-12 border border-amber-200/90 shadow-md relative overflow-hidden">
+      <section className="bg-gradient-to-br from-slate-50 via-white to-orange-50/20 text-slate-900 rounded-3xl p-8 md:p-12 border border-slate-200 shadow-sm relative overflow-hidden">
         <div className="relative z-10 text-center max-w-2xl mx-auto mb-8">
           <span className="text-xs font-mono font-bold text-orange-700 tracking-widest uppercase">Full Lifecycle Accountability</span>
           <h2 className="text-2xl md:text-3xl font-black text-slate-950 mt-1.5">One Project. Complete Lifecycle.</h2>
@@ -355,7 +355,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onOpenProj
             'Contract Award', 'Fund Release', 'Execution Started', 'Field Inspection', 'Progress Review', 'Completion & Guarantee'
           ].map((st, i, arr) => (
             <React.Fragment key={st}>
-              <span className="px-3.5 py-2 rounded-xl bg-white border border-amber-200 text-slate-800 shadow-xs hover:border-amber-400 transition-colors font-bold">
+              <span className="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 shadow-xs hover:border-slate-400 transition-colors font-bold">
                 {st}
               </span>
               {i < arr.length - 1 && <ArrowRight className="w-3.5 h-3.5 text-orange-600 shrink-0" />}
@@ -365,7 +365,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onOpenProj
       </section>
 
       {/* Intelligence Layer Grid */}
-      <section className="bg-white rounded-3xl p-8 md:p-10 border border-amber-200/80 shadow-md">
+      <section className="bg-white rounded-3xl p-8 md:p-10 border border-slate-200 shadow-sm">
         <div className="text-center max-w-2xl mx-auto mb-10">
           <span className="text-xs font-mono font-bold text-orange-700 tracking-wider uppercase">Surveillance Intelligence</span>
           <h2 className="text-2xl md:text-3xl font-black text-slate-900 mt-1.5">AI Surveillance & Intelligence Layers</h2>
@@ -378,8 +378,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onOpenProj
           {intelligenceCards.map((card, i) => {
             const Icon = card.icon;
             return (
-              <div key={i} className="p-6 rounded-2xl border border-amber-200/70 bg-[#FCFAF7] hover:bg-white hover:border-amber-400 hover:shadow-md transition-all group">
-                <div className="w-11 h-11 rounded-xl bg-amber-100 text-amber-900 border border-amber-300 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform shadow-xs">
+              <div key={i} className="p-6 rounded-2xl border border-slate-200 bg-white hover:border-slate-300 hover:shadow-md transition-all group">
+                <div className="w-11 h-11 rounded-xl bg-orange-50 text-orange-900 border border-orange-200 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform shadow-xs">
                   <Icon className="w-5 h-5 text-orange-700" />
                 </div>
                 <h4 className="text-sm font-bold text-slate-900 mb-2 group-hover:text-orange-700 transition-colors">{card.title}</h4>

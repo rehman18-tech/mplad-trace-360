@@ -194,6 +194,12 @@ class ProjectSummarySchema(BaseModel):
     last_inspected_date: Optional[str] = None
     latitude: float
     longitude: float
+    baseline_photo_url: Optional[str] = None
+    baseline_photo_timestamp: Optional[str] = None
+    baseline_photo_officer: Optional[str] = None
+    baseline_photo_officer_designation: Optional[str] = None
+    baseline_photo_method: Optional[str] = None
+    baseline_stage: Optional[str] = None
 
 class ProjectDetailSchema(ProjectSummarySchema):
     description: Optional[str] = None

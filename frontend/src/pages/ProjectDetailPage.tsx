@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { api, BACKEND_BASE } from '../services/api';
+import { api, BACKEND_BASE, GOVERNMENT_DEPARTMENTS } from '../services/api';
 import { offlineStorage, OfflineInspection } from '../services/offlineStorage';
-import { Project, DelayPrediction, Inspection, Complaint } from '../types';
+import { Project, DelayPrediction, Inspection, Complaint, DoubleBlindAudit } from '../types';
 import { RiskBadge } from '../components/common/RiskBadge';
 import { SourceTag } from '../components/common/SourceTag';
 import { HealthGauge } from '../components/common/HealthGauge';
@@ -11,14 +11,15 @@ import { FundFlowSankey } from '../components/funds/FundFlowSankey';
 import { PhotoComparison } from '../components/evidence/PhotoComparison';
 import { WhyAmISeeingThis } from '../components/ai/WhyAmISeeingThis';
 import { DelayPredictionCard } from '../components/ai/DelayPredictionCard';
+import { FourGateIntegrityPanel } from '../components/ai/FourGateIntegrityPanel';
 import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
 import { 
-  ArrowLeft, MapPin, Calendar, User, Building, FileText, 
+  ArrowLeft, MapPin, Calendar, User, Building, Building2, FileText, 
   ShieldCheck, AlertTriangle, Clock, ExternalLink, Printer, 
   Smartphone, MessageSquareQuote, CheckCircle2, ChevronRight,
   RefreshCw, Sparkles, X, Send, Camera, Award, ShieldAlert,
-  HelpCircle, Layers, Check
+  HelpCircle, Layers, Check, Edit3
 } from 'lucide-react';
 
 interface ProjectDetailPageProps {
@@ -39,7 +40,7 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({
   onPrintDossier,
 }) => {
   const { showToast } = useToast();
-  const { isCitizen } = useAuth();
+  const { role, userName, userDesignation, isCitizen, isDistrictAuthority, isAdmin } = useAuth();
   const [project, setProject] = useState<Project | null>(null);
   const [prediction, setPrediction] = useState<DelayPrediction | null>(null);
   const [inspections, setInspections] = useState<Inspection[]>([]);
@@ -52,6 +53,17 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({
   const [showComplaintModal, setShowComplaintModal] = useState(false);
   const [showSignboardModal, setShowSignboardModal] = useState(false);
   const [isScanningAI, setIsScanningAI] = useState(false);
+  const [doubleBlindAudit, setDoubleBlindAudit] = useState<DoubleBlindAudit | null>(null);
+
+  // Higher Official Direct Edit state
+  const [showHigherEditModal, setShowHigherEditModal] = useState(false);
+  const [editDept, setEditDept] = useState(GOVERNMENT_DEPARTMENTS[0]);
+  const [editProgressPct, setEditProgressPct] = useState(0);
+  const [editStatusVal, setEditStatusVal] = useState<Project['status']>('UNDER PROGRESS');
+  const [editFundsPaidVal, setEditFundsPaidVal] = useState('0');
+  const [editOrderRefVal, setEditOrderRefVal] = useState('');
+  const [editJustificationVal, setEditJustificationVal] = useState('');
+  const [isSavingHigherEdit, setIsSavingHigherEdit] = useState(false);
 
   // Inspection form state
   const [inspProgress, setInspProgress] = useState(75);
@@ -64,6 +76,56 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({
   const [cmpDesc, setCmpDesc] = useState('');
   const [cmpName, setCmpName] = useState('');
   const [cmpLocation, setCmpLocation] = useState('');
+
+  const openHigherEditModal = () => {
+    if (!project) return;
+    const matched = GOVERNMENT_DEPARTMENTS.find(d => 
+      project.implementing_agency?.toLowerCase().includes(d.toLowerCase()) || 
+      (project.data_source && project.data_source.includes(d))
+    ) || GOVERNMENT_DEPARTMENTS[0];
+    setEditDept(matched);
+    setEditProgressPct(project.physical_progress);
+    setEditStatusVal(project.status);
+    setEditFundsPaidVal(project.funds_paid?.toString() || '0');
+    setEditOrderRefVal(`MB-${Math.floor(100 + Math.random() * 900)}/REV/2026`);
+    setEditJustificationVal('Statutory physical progress verified by higher authority; measurement ledger updated.');
+    setShowHigherEditModal(true);
+  };
+
+  const handleSaveHigherEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!project) return;
+    if (!editJustificationVal.trim()) {
+      showToast('Modification reason is required for statutory attribution', 'error');
+      return;
+    }
+    setIsSavingHigherEdit(true);
+    try {
+      const updated = await api.updateProject(
+        project.id,
+        {
+          physical_progress: Number(editProgressPct),
+          status: editStatusVal,
+          funds_paid: Number(editFundsPaidVal) || 0,
+          actual_expenditure: Number(editFundsPaidVal) || project.actual_expenditure,
+        },
+        {
+          officer_name: userName,
+          officer_role: role,
+          department_name: editDept,
+          modification_reason: editJustificationVal.trim(),
+          order_reference_no: editOrderRefVal.trim(),
+        }
+      );
+      setProject(updated);
+      showToast(`Project physical progress updated to ${updated.physical_progress}% by ${userName} (${editDept})!`, 'success');
+      setShowHigherEditModal(false);
+    } catch (err: any) {
+      showToast(`Failed to update project: ${err.message || 'Error'}`, 'error');
+    } finally {
+      setIsSavingHigherEdit(false);
+    }
+  };
 
   useEffect(() => {
     loadData();
@@ -83,6 +145,15 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({
       setInspections(serverInsps);
       const localInsps = offlineStorage.getByProject(projectId);
       setOfflineInspections(localInsps);
+
+      // Fetch double blind audit records for this project
+      try {
+        const audits = await api.getDoubleBlindAudits();
+        const matchedAudit = audits.find(a => a.project_id === projectId) || null;
+        setDoubleBlindAudit(matchedAudit);
+      } catch {
+        setDoubleBlindAudit(null);
+      }
     } catch {
       // fallback to offline inspections if any
       const localInsps = offlineStorage.getByProject(projectId);
@@ -240,8 +311,8 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({
               <Award className="w-3.5 h-3.5 text-amber-300" />
               <span>Digital Signboard (Social Audit)</span>
             </button>
-          ) : (
-            /* Officer Inspection Trigger */
+          ) : (role === 'FIELD_OFFICER' || role === 'DISTRICT_AUTHORITY' || role === 'VIGILANCE_AUDITOR' || role === 'ADMIN') ? (
+            /* Officer / Higher Authority Inspection Trigger */
             <button
               onClick={() => setShowInspectionModal(true)}
               className="px-3.5 py-1.5 bg-emerald-700 text-white text-xs font-bold rounded-xl hover:bg-emerald-800 transition-colors flex items-center gap-1.5 shadow-xs"
@@ -250,39 +321,57 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({
               <Smartphone className="w-3.5 h-3.5" />
               <span>Log Inspection</span>
             </button>
+          ) : null}
+
+          {/* Higher Official Direct Edit & Attribution Button */}
+          {(isDistrictAuthority || isAdmin) && (
+            <button
+              onClick={openHigherEditModal}
+              className="px-3.5 py-1.5 bg-gov-navy hover:bg-gov-navy-light text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shadow-gov cursor-pointer"
+              title="Statutory Physical Progress & Data Update (Higher Authority)"
+            >
+              <FileText className="w-3.5 h-3.5 text-gov-saffron" />
+              <span>Edit Project (Higher Official)</span>
+            </button>
           )}
 
-          {/* Quick Grievance Modal Trigger */}
-          <button
-            onClick={() => setShowComplaintModal(true)}
-            className="px-3.5 py-1.5 bg-amber-50 text-amber-900 border border-amber-300 text-xs font-bold rounded-xl hover:bg-amber-100 transition-colors flex items-center gap-1.5 shadow-xs"
-            title="Lodge Public Grievance"
-          >
-            <MessageSquareQuote className="w-3.5 h-3.5 text-amber-700" />
-            <span>File Grievance</span>
-          </button>
+          {/* Quick Grievance Modal Trigger - Citizen & District Authority only, NOT contractor */}
+          {role !== 'CONTRACTOR' && role !== 'FIELD_OFFICER' && (
+            <button
+              onClick={() => setShowComplaintModal(true)}
+              className="px-3.5 py-1.5 bg-amber-50 text-amber-900 border border-amber-300 text-xs font-bold rounded-xl hover:bg-amber-100 transition-colors flex items-center gap-1.5 shadow-xs"
+              title="Lodge Public Grievance"
+            >
+              <MessageSquareQuote className="w-3.5 h-3.5 text-amber-700" />
+              <span>File Grievance</span>
+            </button>
+          )}
 
-          <button
-            onClick={() => onViewMap(project.id)}
-            className="px-3.5 py-1.5 bg-[#FCFAF7] text-slate-700 hover:bg-amber-50 border border-amber-200 text-xs font-bold rounded-xl transition-colors flex items-center gap-1.5 shadow-xs"
-          >
-            <MapPin className="w-3.5 h-3.5 text-orange-600" />
-            <span>Map View</span>
-          </button>
+          {role !== 'CONTRACTOR' && (
+            <button
+              onClick={() => onViewMap(project.id)}
+              className="px-3.5 py-1.5 bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 text-xs font-bold rounded-xl transition-colors flex items-center gap-1.5 shadow-xs"
+            >
+              <MapPin className="w-3.5 h-3.5 text-orange-600" />
+              <span>Map View</span>
+            </button>
+          )}
 
-          <button
-            onClick={() => onPrintDossier(project.id)}
-            className="px-3.5 py-1.5 bg-[#FCFAF7] text-slate-700 hover:bg-amber-50 border border-amber-200 text-xs font-bold rounded-xl transition-colors flex items-center gap-1.5 shadow-xs"
-            title="Export Official PDF Dossier"
-          >
-            <Printer className="w-3.5 h-3.5 text-slate-600" />
-            <span>Print Dossier</span>
-          </button>
+          {role !== 'CONTRACTOR' && role !== 'CITIZEN' && (
+            <button
+              onClick={() => onPrintDossier(project.id)}
+              className="px-3.5 py-1.5 bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 text-xs font-bold rounded-xl transition-colors flex items-center gap-1.5 shadow-xs"
+              title="Export Official PDF Dossier"
+            >
+              <Printer className="w-3.5 h-3.5 text-slate-600" />
+              <span>Export Dossier</span>
+            </button>
+          )}
         </div>
       </div>
 
       {/* Flagship Header Banner */}
-      <div className="bg-white rounded-3xl border border-amber-200/90 p-6 md:p-8 shadow-sm relative overflow-hidden">
+      <div className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-sm relative overflow-hidden">
         {/* Animated Tricolor Shimmer Accent */}
         <div className="absolute top-0 left-0 right-0 h-1.5 animate-tiranga-shimmer opacity-95"></div>
         <div className="flex flex-col lg:flex-row lg:items-start justify-between pb-5 border-b border-slate-100 gap-4">
@@ -379,7 +468,10 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({
           { id: 'funds', label: 'PFMS Fund Trail', icon: FileText },
           { id: 'evidence', label: 'Field Evidence & Photos', icon: Camera },
           { id: 'guarantees', label: 'Bank Guarantees (PBG)', icon: ShieldCheck },
-          { id: 'disputes', label: 'Grievances & Disputes', icon: AlertTriangle, count: (project.complaints?.length || 0) + (project.disputes?.length || 0) },
+          ...(role !== 'CONTRACTOR'
+            ? [{ id: 'disputes', label: 'Grievances & Disputes', icon: AlertTriangle, count: (project.complaints?.length || 0) + (project.disputes?.length || 0) }]
+            : [{ id: 'disputes', label: 'Contractor Disputes & Claims', icon: AlertTriangle, count: project.disputes?.length || 0 }]
+          ),
         ].map(tab => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -410,6 +502,9 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({
       {/* Tab 1: Overview & AI Health */}
       {activeTab === 'overview' && (
         <div className="space-y-6">
+          {/* 4-Gate Autonomous AI Anti-Fraud Integrity Audit Panel */}
+          <FourGateIntegrityPanel project={project} inspections={inspections} />
+
           {/* 5-Dimension Health Gauge Section */}
           <HealthGauge
             score={project.overall_risk_score}
@@ -498,6 +593,81 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({
 
           {/* AI Delay Prediction Card */}
           {prediction && <DelayPredictionCard prediction={prediction} />}
+
+          {/* Statutory 10-Stage Lifecycle Live Section */}
+          <div className="bg-white rounded-xl border border-gov-ivory-border p-6 shadow-gov">
+            <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+              <div>
+                <h4 className="text-sm font-bold text-gov-navy flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-gov-saffron" />
+                  <span>Statutory 10-Stage Project Lifecycle Status</span>
+                </h4>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  End-to-end statutory milestones tracked from Hon'ble MP recommendation through final social audit.
+                </p>
+              </div>
+              <button
+                onClick={() => setActiveTab('timeline')}
+                className="px-3 py-1.5 bg-slate-100 hover:bg-gov-navy hover:text-white text-gov-navy rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+              >
+                <span>Inspect All 10 Stages</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            <ProjectLifecycle events={project.timeline_events || []} />
+          </div>
+
+          {/* Statutory Bank Guarantee (PBG) & Defect Escrow Summary */}
+          <div className="bg-white rounded-xl border border-gov-ivory-border p-6 shadow-gov">
+            <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+              <div>
+                <h4 className="text-sm font-bold text-gov-navy flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                  <span>Statutory Performance Bank Guarantee (PBG) &amp; Defect Escrow</span>
+                </h4>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Mandated 5% Performance Security held in banking escrow under CPWD / MoSPI Clause 4.2.
+                </p>
+              </div>
+              <button
+                onClick={() => setActiveTab('guarantees')}
+                className="px-3 py-1.5 bg-slate-100 hover:bg-gov-navy hover:text-white text-gov-navy rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+              >
+                <span>View Full PBG Ledger</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            {project.guarantees && project.guarantees.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {project.guarantees.map((g, idx) => (
+                  <div key={idx} className="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-mono text-xs font-bold text-gov-navy">{g.id}</span>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                          {g.status}
+                        </span>
+                      </div>
+                      <p className="text-xs font-extrabold text-gov-navy mt-1">{g.bank_or_institution}</p>
+                      <p className="text-xs text-slate-700 mt-0.5">
+                        Guarantee Value: <strong className="text-emerald-700">{formatIndianCurrency(g.amount)}</strong>
+                      </p>
+                    </div>
+                    <div className="mt-3 pt-2 border-t border-emerald-200 text-[11px] text-slate-600 flex items-center justify-between">
+                      <span>Expires: {g.expiry_date}</span>
+                      <span className="font-bold text-emerald-800">{g.days_to_expiry} days remaining</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 text-xs text-slate-600">
+                Performance Guarantee registered with State Nodal Bank Escrow: ₹{formatIndianCurrency(Math.round((project.contract_amount || 2500000) * 0.05))}.
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -558,6 +728,15 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({
         return (
           <div className="space-y-6">
             <PhotoComparison
+              beforeUrl={project.baseline_photo_url}
+              beforeStage={project.baseline_stage || 'Milestone 0: Ground-Zero Site Handover Baseline (0%)'}
+              beforeDate={project.baseline_photo_timestamp || project.start_date || 'Project Sanction Date'}
+              beforeOfficer={project.baseline_photo_officer}
+              beforeOfficerDesignation={project.baseline_photo_officer_designation}
+              hasBaselinePhoto={Boolean(project.baseline_photo_url)}
+              assignedFieldOfficer={project.assigned_field_officer}
+              assignedOfficerDesignation={project.assigned_field_officer_designation}
+              onNavigateToInspection={() => onInspect(project.id)}
               afterUrl={dynamicAfterPhoto}
               afterStage={dynamicStage}
               afterDate={dynamicDate}
@@ -568,6 +747,13 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({
               inspections={inspections}
               offlineInspections={offlineInspections}
               aiNotes={dynamicAiNotes}
+              baselineCoordinates={{ lat: project.latitude, lon: project.longitude }}
+              baselineLocationName={`${project.village || project.mandal_block}, ${project.district}, ${project.state}`}
+              projectId={project.id}
+              doubleBlindAudit={doubleBlindAudit}
+              projectProgress={project.physical_progress}
+              projectStatus={project.status}
+              onReloadData={loadData}
             />
           </div>
         );
@@ -620,46 +806,83 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({
       {/* Tab 6: Grievances & Disputes */}
       {activeTab === 'disputes' && (
         <div className="space-y-6">
-          <div className="bg-white rounded-xl border border-gov-ivory-border p-6 shadow-gov">
-            <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
-              <h3 className="text-base font-bold text-gov-navy flex items-center gap-2">
-                <MessageSquareQuote className="w-5 h-5 text-amber-600" />
-                <span>Citizen Grievances & Discrepancies</span>
-              </h3>
+          {/* Citizen Grievances: Only visible to non-contractors to protect whistleblowers */}
+          {role !== 'CONTRACTOR' ? (
+            <div className="bg-white rounded-xl border border-gov-ivory-border p-6 shadow-gov">
+              <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
+                <h3 className="text-base font-bold text-gov-navy flex items-center gap-2">
+                  <MessageSquareQuote className="w-5 h-5 text-amber-600" />
+                  <span>Citizen Grievances &amp; Discrepancies</span>
+                </h3>
 
-              <button
-                onClick={() => setShowComplaintModal(true)}
-                className="px-3 py-1.5 bg-amber-600 text-white text-xs font-bold rounded-lg hover:bg-amber-700"
-              >
-                + Lodge New Grievance
-              </button>
+                <button
+                  onClick={() => setShowComplaintModal(true)}
+                  className="px-3 py-1.5 bg-amber-600 text-white text-xs font-bold rounded-lg hover:bg-amber-700"
+                >
+                  + Lodge New Grievance
+                </button>
+              </div>
+
+              {project.complaints && project.complaints.length > 0 ? (
+                <div className="space-y-3">
+                  {project.complaints.map((c, idx) => (
+                    <div key={idx} className="p-4 rounded-xl border border-slate-200 bg-slate-50">
+                      <div className="flex items-center justify-between text-xs mb-1">
+                        <span className="font-mono font-bold text-gov-navy">{c.id}</span>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900">
+                          {c.status}
+                        </span>
+                      </div>
+                      <p className="text-xs font-bold text-slate-800">{c.category}</p>
+                      <p className="text-xs text-slate-600 mt-1 leading-relaxed">{c.description}</p>
+                      <div className="mt-2 text-[11px] text-slate-400 flex items-center gap-3">
+                        <span>Filed: {c.submission_date}</span>
+                        <span>Assigned to: {c.assigned_to}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-xs text-slate-400">No public grievances lodged for this work.</p>
+                </div>
+              )}
             </div>
+          ) : (
+            <div className="bg-indigo-50/70 border border-indigo-200 rounded-xl p-6 text-xs text-indigo-950 space-y-2">
+              <div className="flex items-center gap-2 font-bold text-indigo-900">
+                <ShieldCheck className="w-4 h-4 text-indigo-600" />
+                <span>Whistleblower &amp; Grievance Protection Quarantine</span>
+              </div>
+              <p className="text-indigo-900/80 leading-relaxed">
+                Under Central Vigilance Commission (CVC) Whistleblower Protection Directives, citizen complaint registries and evidence trails are strictly quarantined from EPC contractors to eliminate any possibility of witness intimidation or on-site retaliation. Official defect rectification directives are issued exclusively via formal engineering notices by the Executive Engineer.
+              </p>
+            </div>
+          )}
 
-            {project.complaints && project.complaints.length > 0 ? (
+          {/* Contractual Claims & Disputes */}
+          {project.disputes && project.disputes.length > 0 && (
+            <div className="bg-white rounded-xl border border-gov-ivory-border p-6 shadow-gov space-y-3">
+              <h3 className="text-base font-bold text-gov-navy flex items-center gap-2 pb-3 border-b border-slate-100">
+                <AlertTriangle className="w-5 h-5 text-rose-600" />
+                <span>Formal Contractual Disputes &amp; Measurement Claims</span>
+              </h3>
               <div className="space-y-3">
-                {project.complaints.map((c, idx) => (
-                  <div key={idx} className="p-4 rounded-xl border border-slate-200 bg-slate-50">
-                    <div className="flex items-center justify-between text-xs mb-1">
-                      <span className="font-mono font-bold text-gov-navy">{c.id}</span>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900">
-                        {c.status}
+                {project.disputes.map((d, idx) => (
+                  <div key={idx} className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold text-gov-navy">{d.id}</span>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800">
+                        {d.status}
                       </span>
                     </div>
-                    <p className="text-xs font-bold text-slate-800">{c.category}</p>
-                    <p className="text-xs text-slate-600 mt-1 leading-relaxed">{c.description}</p>
-                    <div className="mt-2 text-[11px] text-slate-400 flex items-center gap-3">
-                      <span>Filed: {c.submission_date}</span>
-                      <span>Assigned to: {c.assigned_to}</span>
-                    </div>
+                    <p className="text-xs text-slate-700 font-semibold">{d.dispute_type}</p>
+                    <p className="text-xs text-slate-600 leading-relaxed">{d.description}</p>
                   </div>
                 ))}
               </div>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-xs text-slate-400">No public grievances lodged for this work.</p>
-              </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -889,9 +1112,9 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({
             </div>
 
             {/* Simulated Stone Plaque */}
-            <div className="p-6 bg-gradient-to-b from-[#FFFDF9] to-[#F7F3EB] space-y-4">
-              <div className="p-5 rounded-2xl bg-white border-2 border-dashed border-amber-300 shadow-xs space-y-3 font-sans text-xs">
-                <div className="text-center pb-2 border-b border-amber-200">
+            <div className="p-6 bg-gradient-to-b from-slate-50 to-slate-100 space-y-4">
+              <div className="p-5 rounded-2xl bg-white border-2 border-dashed border-slate-300 shadow-xs space-y-3 font-sans text-xs">
+                <div className="text-center pb-2 border-b border-slate-200">
                   <span className="text-[10px] font-mono font-bold tracking-widest text-slate-500 uppercase block">Government of India • MPLADS Scheme</span>
                   <h4 className="text-sm font-black text-gov-navy uppercase tracking-tight mt-0.5">{project.title}</h4>
                   <span className="text-[11px] font-mono text-emerald-800 font-bold">{project.id}</span>
@@ -969,6 +1192,179 @@ export const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Higher Official Statutory Edit Modal */}
+      {showHigherEditModal && project && (
+        <div 
+          onClick={(e) => { if (e.target === e.currentTarget) setShowHigherEditModal(false); }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto"
+        >
+          <div className="bg-white rounded-2xl border border-gov-ivory-border shadow-2xl max-w-xl w-full my-8 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            {/* Modal Header */}
+            <div className="bg-gov-navy text-white px-6 py-4 flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-bold flex items-center gap-2">
+                  <Edit3 className="w-5 h-5 text-gov-saffron" />
+                  <span>Statutory Project Physical Progress &amp; Data Update</span>
+                </h3>
+                <p className="text-[11px] text-slate-300 mt-0.5">
+                  Authorized Higher Official: <strong className="text-white">{userName}</strong> ({role})
+                </p>
+              </div>
+              <button
+                onClick={() => setShowHigherEditModal(false)}
+                className="p-1 rounded-lg hover:bg-white/10 text-white transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Department Attribution Banner */}
+            <div className="bg-indigo-50 border-b border-indigo-200 px-6 py-2.5 text-[11px] text-indigo-900 flex items-center gap-2">
+              <Building2 className="w-4 h-4 text-indigo-700 shrink-0" />
+              <span>
+                <strong>Departmental Attribution:</strong> This update will be permanently attributed to <strong>{editDept}</strong> in the public ledger and audit trail.
+              </span>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSaveHigherEdit} className="p-6 space-y-4 text-xs">
+              <div>
+                <label className="block font-bold text-gov-navy mb-1">
+                  Responsible / Authorizing Department *
+                </label>
+                <select
+                  value={editDept}
+                  onChange={(e) => setEditDept(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white focus:outline-none focus:border-gov-navy font-semibold text-slate-800"
+                >
+                  {GOVERNMENT_DEPARTMENTS.map(dept => (
+                    <option key={dept} value={dept}>{dept}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Physical Progress Slider */}
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-gov-navy">Certified Physical Progress (%):</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={editProgressPct}
+                      onChange={(e) => setEditProgressPct(Math.min(100, Math.max(0, parseInt(e.target.value) || 0)))}
+                      className="w-16 px-2 py-1 text-center font-black text-gov-navy border border-slate-300 rounded-lg bg-white"
+                    />
+                    <span className="font-bold text-gov-navy text-sm">%</span>
+                  </div>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={editProgressPct}
+                  onChange={(e) => setEditProgressPct(parseInt(e.target.value))}
+                  className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-gov-navy"
+                />
+                <div className="flex justify-between text-[10px] text-slate-400 font-semibold">
+                  <span>0% (Commenced)</span>
+                  <span>50% (Intermediate Milestone)</span>
+                  <span>100% (Completed)</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-bold text-gov-navy mb-1">
+                    Statutory Project Status
+                  </label>
+                  <select
+                    value={editStatusVal}
+                    onChange={(e) => setEditStatusVal(e.target.value as any)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white focus:outline-none focus:border-gov-navy font-semibold"
+                  >
+                    <option value="RECOMMENDED">RECOMMENDED</option>
+                    <option value="SANCTIONED">SANCTIONED</option>
+                    <option value="TENDERED">TENDERED</option>
+                    <option value="UNDER PROGRESS">UNDER PROGRESS</option>
+                    <option value="COMPLETED">COMPLETED</option>
+                    <option value="STALLED">STALLED</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-gov-navy mb-1">
+                    Funds Disbursed to Contractor (₹)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="5000"
+                    value={editFundsPaidVal}
+                    onChange={(e) => setEditFundsPaidVal(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:border-gov-navy font-mono"
+                  />
+                  <span className="text-[10px] text-slate-400 mt-0.5 block">
+                    Sanction Ceiling: {formatIndianCurrency(project.sanctioned_amount)}
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-gov-navy mb-1">
+                  Measurement Book / Order Reference Number *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g., MB-741/PWD/2026 or GO/MS/108"
+                  value={editOrderRefVal}
+                  onChange={(e) => setEditOrderRefVal(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:border-gov-navy font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-gov-navy mb-1">
+                  Mandatory Modification Justification *
+                </label>
+                <textarea
+                  rows={2}
+                  required
+                  value={editJustificationVal}
+                  onChange={(e) => setEditJustificationVal(e.target.value)}
+                  placeholder="Specify official reason, on-site technical inspection findings, or contract milestone justification..."
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:border-gov-navy"
+                />
+                <span className="text-[10px] text-slate-400 mt-0.5 block">
+                  Mandated by MoSPI Clause 4.2 for digital audit tracking.
+                </span>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="pt-3 border-t border-slate-200 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowHigherEditModal(false)}
+                  className="px-4 py-2 border border-slate-300 text-slate-600 hover:bg-slate-100 rounded-xl font-bold transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingHigherEdit}
+                  className="px-6 py-2 bg-gov-navy hover:bg-gov-navy-light text-white font-bold rounded-xl shadow-gov transition-colors flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                >
+                  {isSavingHigherEdit ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                  <span>Save Physical Update &amp; Log Audit</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
