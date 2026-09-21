@@ -443,6 +443,12 @@ export const api = {
     currentList.unshift(fullProject);
     setStored(STORAGE_KEYS.PROJECTS, currentList);
 
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('mplad_projects_updated', {
+        detail: { count: currentList.length, project: fullProject }
+      }));
+    }
+
     // Append to immutable audit trail
     const auditLogs = getStored<AuditLog[]>(STORAGE_KEYS.AUDIT_LOGS, INITIAL_AUDIT_LOGS);
     auditLogs.unshift({
@@ -518,6 +524,12 @@ export const api = {
 
     currentList[idx] = updatedProject;
     setStored(STORAGE_KEYS.PROJECTS, currentList);
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('mplad_projects_updated', {
+        detail: { count: currentList.length, project: updatedProject }
+      }));
+    }
 
     // Append to immutable audit trail
     const auditLogs = getStored<AuditLog[]>(STORAGE_KEYS.AUDIT_LOGS, INITIAL_AUDIT_LOGS);

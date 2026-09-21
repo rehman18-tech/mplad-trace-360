@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../services/api';
 import { OverviewAnalytics } from '../types';
+import { INITIAL_PROJECTS } from '../services/mockData';
 import { formatIndianCurrency } from '../components/common/StatCard';
 import { useLanguage } from '../context/LanguageContext';
 import { 
@@ -16,9 +17,52 @@ interface LandingPageProps {
 export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onOpenProject }) => {
   const { t } = useLanguage();
   const [stats, setStats] = useState<OverviewAnalytics | null>(null);
+  const [projectCount, setProjectCount] = useState<number>(() => {
+    try {
+      const stored = localStorage.getItem('mplad_projects');
+      if (stored) {
+        const list = JSON.parse(stored);
+        if (Array.isArray(list) && list.length > 0) return list.length;
+      }
+    } catch {}
+    return INITIAL_PROJECTS.length;
+  });
+  const [uniqueStatesCount, setUniqueStatesCount] = useState<number>(() => {
+    return new Set(INITIAL_PROJECTS.map(p => p.state).filter(Boolean)).size || 10;
+  });
+
+  const refreshData = () => {
+    api.getOverviewAnalytics().then(s => {
+      setStats(s);
+      if (s?.total_projects) setProjectCount(s.total_projects);
+      if (s?.states_covered_count) setUniqueStatesCount(s.states_covered_count);
+    }).catch(() => {});
+
+    api.getProjects().then(projs => {
+      if (projs && projs.length > 0) {
+        setProjectCount(projs.length);
+        const states = new Set(projs.map(p => p.state).filter(Boolean));
+        if (states.size > 0) setUniqueStatesCount(states.size);
+      }
+    }).catch(() => {});
+  };
 
   useEffect(() => {
-    api.getOverviewAnalytics().then(setStats).catch(() => {});
+    refreshData();
+
+    const handleUpdate = (e?: any) => {
+      if (e?.detail?.count) {
+        setProjectCount(e.detail.count);
+      }
+      refreshData();
+    };
+
+    window.addEventListener('mplad_projects_updated', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+    return () => {
+      window.removeEventListener('mplad_projects_updated', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
   }, []);
 
   const steps = [
@@ -38,6 +82,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onOpenProj
     { icon: Scale, title: 'Dispute & Claim Review', desc: 'Compares contractor measurement claims against field officer physical audits.' },
     { icon: ShieldCheck, title: 'Guarantee Countdown', desc: 'Automated 30-day alerts before Performance Bank Guarantees or warranties expire.' },
   ];
+
+  const totalCount = stats?.total_projects || projectCount;
+  const statesCount = stats?.states_covered_count || uniqueStatesCount;
+  const districtsCount = stats?.districts_covered_count || 28;
+
+  const rawCta = t('hero_search_cta', 'Explore {count} Public Works');
+  const ctaText = rawCta.includes('{count}')
+    ? rawCta.replace('{count}', String(totalCount))
+    : rawCta.replace(/52/g, String(totalCount));
+
+  const rawRadar = t('hero_radar_stats', '{count} Works • {states} States Active');
+  const radarStatsText = rawRadar.includes('{count}')
+    ? rawRadar.replace('{count}', String(totalCount)).replace('{states}', String(statesCount))
+    : rawRadar.replace(/52/g, String(totalCount)).replace(/10/g, String(statesCount));
 
   return (
     <div className="space-y-10 pb-20">
@@ -114,7 +172,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onOpenProj
                 onClick={() => onNavigate('projects')}
                 className="px-6 py-3 bg-gradient-to-r from-orange-600 via-amber-600 to-orange-700 hover:from-orange-700 hover:to-amber-700 text-white font-bold text-xs md:text-sm rounded-xl transition-all shadow-md shadow-orange-500/20 flex items-center gap-2 transform hover:-translate-y-0.5"
               >
-                <span>{t('hero_search_cta')}</span>
+                <span>{ctaText}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
 
@@ -183,7 +241,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onOpenProj
                 ● {t('hero_radar_title')}
               </span>
               <p className="text-xs font-extrabold text-slate-900 mt-1">
-                52 Works • 10 States Active
+                {radarStatsText}
               </p>
               <div className="flex items-center justify-center gap-1.5 mt-2">
                 <span className="w-2 h-2 rounded-full bg-orange-500"></span>
@@ -204,10 +262,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate, onOpenProj
             <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
           </div>
           <span className="text-2xl md:text-3xl font-black text-slate-900 mt-2 block tracking-tight">
-            {stats?.total_projects || 52}
+            {totalCount}
           </span>
           <div className="flex items-center gap-1 mt-2 text-[10px] font-semibold text-orange-700">
-            <span>🇮🇳 Across 10 States & 28 Districts</span>
+            <span>🇮🇳 Across {statesCount} States & {districtsCount} Districts</span>
           </div>
         </div>
 
